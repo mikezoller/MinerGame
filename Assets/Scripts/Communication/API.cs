@@ -18,7 +18,7 @@ namespace Miner.Communication
         public const string HOST = "https://localhost:44332/";
 #endif
 
-        public static readonly string TOKEN_QUERY_PARAM = "token=";
+        public static readonly string TOKEN_QUERY_PARAM = "token="; 
         public static readonly string GET_PLAYER_PATH = "api/players";
 
         private const string USER_ID_KEY = ":user_id";
