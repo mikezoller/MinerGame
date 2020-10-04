@@ -93,6 +93,11 @@ namespace Miner
 		// Update is called once per frame
 		private void Update()
 		{
+			if (Input.GetButton("Horizontal"))
+			{
+				var dir = Input.GetAxis("Horizontal") > 0 ? 1 : -1;
+				transform.RotateAround(character.transform.position, Vector3.up, dir * Time.deltaTime * 100);
+			}
 			if (Input.GetMouseButtonDown(0))
 			{
 

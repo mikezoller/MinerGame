@@ -32,7 +32,24 @@ namespace Assets.Scripts.GameObjects.Resources
 		{
 			this.Type = type;
 		}
-
+		public override void OnRefilled()
+		{
+			base.OnRefilled();
+			foreach (Transform child in transform)
+			{
+				if (child.tag == "MaterialTarget")
+					child.gameObject.SetActive(true);
+			}
+		}
+		public override void OnDepleted()
+		{
+			base.OnDepleted();
+			foreach (Transform child in transform)
+			{
+				if (child.tag == "MaterialTarget")
+					child.gameObject.SetActive(false);
+			}
+		}
 		public void SetType(RockType type)
 		{
 			switch (type)
@@ -74,10 +91,13 @@ namespace Assets.Scripts.GameObjects.Resources
 			SetType(Type);
 			SetMaterial();
 		}
-
 		private void SetMaterial()
 		{
-			resourceMaterial = UnityEngine.Resources.Load<Material>("Materials\\" + resourceMaterialName);
+			SetMaterial(resourceMaterialName);
+		}
+		private void SetMaterial(string material)
+		{
+			resourceMaterial = UnityEngine.Resources.Load<Material>("Materials\\" + material);
 			GameObject go = null;
 			foreach (Transform child in transform)
 			{

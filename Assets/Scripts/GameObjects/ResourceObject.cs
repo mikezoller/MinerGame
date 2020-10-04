@@ -19,7 +19,33 @@ namespace Miner.GameObjects
 		protected string StopTrigger = "Idle";
 		protected string resourceMaterialName;
 		protected Material resourceMaterial;
+		private bool depleted;
+		public bool Depleted
+		{
+			get { return depleted; }
+			set
+			{
+				depleted = value;
+				if (depleted)
+				{
+					OnDepleted();
+				}
+				else
+				{
+					OnRefilled();
+				}
 
+			}
+		}
+
+		public virtual void OnDepleted()
+		{
+
+		}
+		public virtual void OnRefilled()
+		{
+
+		}
 		// Refresh yourself
 		public InventoryItem GetItem()
 		{
@@ -41,6 +67,9 @@ namespace Miner.GameObjects
 				success = UnityEngine.Random.Range(0.0f, 1.0f) > result.Probability;
 				yield return new WaitForSeconds((float)result.Interval);
 			}
+			Depleted = true;
+			StartCoroutine(Recharge());
+
 			var inventoryItem = GetItem();
 			StartCoroutine(PlayersApi.DoResourceAction("mwnzoller", actionId, (user, err) =>
 			{
@@ -63,6 +92,12 @@ namespace Miner.GameObjects
 			}));
 		}
 
+		public IEnumerator Recharge()
+		{
+			yield return new WaitForSeconds(5);
+			Depleted = false;
+		}
+
 		public void OnPointerClick(PointerEventData eventData)
 		{
 			var player = GameObject.FindGameObjectWithTag("Player");
@@ -78,7 +113,10 @@ namespace Miner.GameObjects
 				character.GetComponent<NavMeshAgent>().SetDestination(myNavHit.position);
 
 				var bounds = this.GetComponent<Collider>().bounds;
-				character.DoAction(myNavHit.position, StartTrigger, DoWork(gameManager), Math.Max(bounds.size.x / 2.0f, bounds.size.z / 2.0f) + Vector3.Distance(myNavHit.position, this.transform.position));
+				if (!Depleted)
+				{
+					character.DoAction(myNavHit.position, StartTrigger, DoWork(gameManager), Math.Max(bounds.size.x / 2.0f, bounds.size.z / 2.0f) + Vector3.Distance(myNavHit.position, this.transform.position));
+				}
 			}
 		}
 	}
