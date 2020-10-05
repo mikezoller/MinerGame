@@ -1,4 +1,5 @@
 ﻿using Miner;
+using Miner.Communication;
 using Miner.GameObjects;
 using System;
 using System.Collections;
@@ -125,6 +126,8 @@ public class Character : MonoBehaviour
 			
 		} else if (animator.GetBool("walking"))
 		{
+			StartCoroutine(PlayersApi.UpdateLocation("mwnzoller", this.transform.position));
+
 			var targetPosition = agent.pathEndPosition;
 			var targetPoint = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
 			var _direction = (targetPoint - transform.position).normalized;

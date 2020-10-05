@@ -93,11 +93,11 @@ namespace Miner
 		// Update is called once per frame
 		private void Update()
 		{
-			if (Input.GetButton("Horizontal"))
-			{
-				var dir = Input.GetAxis("Horizontal") > 0 ? 1 : -1;
-				transform.RotateAround(character.transform.position, Vector3.up, dir * Time.deltaTime * 100);
-			}
+			//if (Input.GetButton("Horizontal"))
+			//{
+			//	var dir = Input.GetAxis("Horizontal") > 0 ? 1 : -1;
+			//	transform.RotateAround(character.transform.position, Vector3.up, dir * Time.deltaTime * 100);
+			//}
 			if (Input.GetMouseButtonDown(0))
 			{
 
@@ -171,6 +171,15 @@ namespace Miner
 						playerData.Inventory = user.Inventory;
 						playerData.Bank = user.Bank;
 						playerData.Progress = user.Progress;
+
+						var playerPos = new Vector3((float)user.LastLocation.X, (float)user.LastLocation.Y, (float)user.LastLocation.Z);
+
+						NavMeshHit myNavHit;
+						if (NavMesh.SamplePosition(playerPos, out myNavHit, 100, -1))
+						{
+							playerPos = myNavHit.position;
+						}
+							character.GetComponent<NavMeshAgent>().Warp(playerPos);
 
 						inventoryService = new InventoryService(playerData.Bank, playerData.Inventory, panelBank, inventory);
 

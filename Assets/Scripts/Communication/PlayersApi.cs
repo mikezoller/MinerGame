@@ -38,7 +38,31 @@ namespace Miner.Communication
 
 			return null;
 		}
-
+		public static IEnumerator UpdateLocation(
+			string playerName, Vector3 location,
+			Action<bool, string> doneCallback = null)
+		{
+			var done = wrapCallback(doneCallback);
+			try
+			{
+				return Post(path(GET_PLAYER_PATH + "/UpdatePlayerLocation"), new
+				{ playerName, X = location.x, Y = location.y, Z =location.z },
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(false, requestError(request));
+						else
+							done(requestResponse<bool>(request), null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(false, ex.Message);
+			}
+			return null;
+		}
 		public static IEnumerator DoResourceAction(
 			string playerName, int actionId,
 			Action<bool, string> doneCallback = null)

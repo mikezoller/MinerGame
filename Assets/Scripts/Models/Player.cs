@@ -4,6 +4,14 @@ using System.Linq;
 
 namespace Miner.Models
 {
+	public class PlayerLocation
+	{
+		public double X { get; set; }
+		public double Y { get; set; }
+		public double Z { get; set; }
+		public DateTime TimeStampUTC { get; set; }
+	}
+
 	[Serializable]
 	public abstract class ItemContainer
 	{
@@ -184,6 +192,7 @@ namespace Miner.Models
 		public Inventory Inventory { get; set; } = new Inventory();
 		public Bank Bank { get; set; } = new Bank();
 		public Progress Progress { get; set; } = new Progress();
+		public PlayerLocation LastLocation { get; set; }
 		public Player(string id, string name)
 		{
 			this.Id = id;
