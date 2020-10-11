@@ -1,9 +1,11 @@
+using Miner.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Miner.Models
 {
+	[Serializable]
 	public class PlayerLocation
 	{
 		public double X { get; set; }
@@ -21,6 +23,29 @@ namespace Miner.Models
 
 		public ItemContainer()
 		{
+		}
+
+		public virtual bool HasAtLeast(int itemId, int quantity)
+		{
+			var reqItem = ItemDatabase.GetItem(itemId);
+			bool hasAtLeast = true;
+			if (reqItem.stackable || allowStackingAll)
+			{
+				var invItem = InventoryItems.FirstOrDefault(x => x.item.id == itemId);
+				if (invItem == null || invItem.quantity < quantity)
+				{
+					hasAtLeast = false;
+				}
+			}
+			else
+			{
+				if (InventoryItems.Count(x=>x.item.id == itemId) < quantity)
+				{
+					hasAtLeast = false;
+				}
+			}
+
+			return hasAtLeast;
 		}
 
 		public virtual bool CanAdd(InventoryItem invItem)

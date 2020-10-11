@@ -1,4 +1,5 @@
 ﻿using Miner.GameObjects;
+using UnityEngine;
 
 namespace Assets.Scripts.GameObjects.Resources
 {
@@ -34,6 +35,24 @@ namespace Assets.Scripts.GameObjects.Resources
 		public WoodcuttingResource() : this(TreeType.None)
 		{
 
+		}
+		public override void OnRefilled()
+		{
+			base.OnRefilled();
+			foreach (Transform child in transform)
+			{
+				if (child.tag == "MaterialTarget")
+					child.gameObject.SetActive(true);
+			}
+		}
+		public override void OnDepleted()
+		{
+			base.OnDepleted();
+			foreach (Transform child in transform)
+			{
+				if (child.tag == "MaterialTarget")
+					child.gameObject.SetActive(false);
+			}
 		}
 		public WoodcuttingResource(TreeType type)
 		{

@@ -8,6 +8,7 @@ TagManager:
   - StartMenu
   - HUD
   - MaterialTarget
+  - CraftPanel
   layers:
   - Default
   - TransparentFX

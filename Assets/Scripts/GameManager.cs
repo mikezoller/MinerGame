@@ -23,6 +23,7 @@ namespace Miner
 		public Map map;
 		public HUD hud;
 		public MessagePanel messagePanel;
+		public PanelCraft craftPanel;
 		public GameObjects.Bank panelBank;
 		public GameObjects.PanelRequirements panelRequirements;
 		public Character character;
@@ -43,6 +44,9 @@ namespace Miner
 			messagePanel.HideMessage();
 			panelBank.gameObject.SetActive(false);
 			panelRequirements.gameObject.SetActive(false);
+			var cpgo = GameObject.FindWithTag("CraftPanel");
+			cpgo.SetActive(false);
+			craftPanel = cpgo.GetComponent<PanelCraft>();
 
 
 		}
@@ -59,7 +63,7 @@ namespace Miner
 		}
 		private void OnApplicationQuit()
 		{
-			SaveGame();
+			/*SaveGame();*/
 		}
 		public void SetAnimBool(string trigger)
 		{
@@ -186,6 +190,7 @@ namespace Miner
 						inventory.SetPlayerInventory(playerData.Inventory);
 						panelBank.SetPlayerBank(playerData.Bank);
 						skillsPanel.SetPlayerSkills(playerData.Progress.Skills);
+						craftPanel.playerData = playerData;
 					}
 					LoadMap();
 					ShowHUD(true);

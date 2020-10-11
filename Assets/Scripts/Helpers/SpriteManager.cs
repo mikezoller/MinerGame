@@ -22,7 +22,9 @@ namespace Miner.Helpers
 						int count = 0;
 						foreach (var y in x)
 						{
-							ItemSprites.Add(i * 100 + count, y);
+							int column = (int)y.rect.x / 64;
+							int row = 9 - ((int)y.rect.y / 64);
+							ItemSprites.Add(i * 100 + (row * 10 + column ), y);
 							count++;
 						}
 					}
