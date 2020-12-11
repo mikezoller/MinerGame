@@ -1,4 +1,6 @@
-﻿using Assets.Scripts.Helpers;
+﻿using Assets.Scripts;
+using Assets.Scripts.GameObjects;
+using Assets.Scripts.Helpers;
 using Miner.Communication;
 using Miner.GameObjects;
 using Miner.Helpers;
@@ -31,10 +33,6 @@ namespace Miner
 		// Services
 		private InventoryService inventoryService;
 
-		// DATA
-		public Player playerData;
-
-
 
 		// Start is called before the first frame update
 		public void Start()
@@ -51,20 +49,6 @@ namespace Miner
 
 		}
 
-		public void PauseCamera(bool pause)
-		{
-			//var d = Camera.main.GetComponent<DragCamera2D>();
-			//d.enabled = !pause;
-		}
-		public void TogglePauseCamera()
-		{
-			//var d = Camera.main.GetComponent<DragCamera2D>();
-			//d.enabled = !d.enabled;
-		}
-		private void OnApplicationQuit()
-		{
-			/*SaveGame();*/
-		}
 		public void SetAnimBool(string trigger)
 		{
 			character.SetAnimBool(trigger);
@@ -82,7 +66,6 @@ namespace Miner
 
 			startMenu.gameObject.SetActive(show);
 		}
-
 		private void ShowHUD(bool show)
 		{
 
@@ -95,14 +78,9 @@ namespace Miner
 			//PauseCamera(show);
 		}
 		// Update is called once per frame
-		private void Update()
+		private void FixedUpdate()
 		{
-			//if (Input.GetButton("Horizontal"))
-			//{
-			//	var dir = Input.GetAxis("Horizontal") > 0 ? 1 : -1;
-			//	transform.RotateAround(character.transform.position, Vector3.up, dir * Time.deltaTime * 100);
-			//}
-			if (Input.GetMouseButtonDown(0))
+			if (Input.GetMouseButton(0))
 			{
 
 				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -114,20 +92,22 @@ namespace Miner
 
 					if (Physics.Raycast(ray, out hitInfo) && GUIUtility.hotControl == 0)
 					{
-						if (character.currentAction != null)
-						{
-							StopCoroutine(character.currentAction);
-							character.currentAction = null;
-							if (!string.IsNullOrEmpty(character.activeAnimation))
-							{
-								character.ClearAnimBool(character.activeAnimation);
-							}
-							character.StartAnimation("Idle");
-						}
 						hud.HideExtra();
-						character.GetComponent<NavMeshAgent>().ResetPath();
-						character.GetComponent<NavMeshAgent>().SetDestination(hitInfo.point);
+						NavMeshHit myNavHit;
+						if (NavMesh.SamplePosition(hitInfo.point, out myNavHit, 1, NavMesh.AllAreas))
+						{
+							character.WalkTo(myNavHit.position);
+						}
 					}
+				}
+
+				RaycastHit hit = new RaycastHit();
+				if (Physics.Raycast(ray.origin, ray.direction, out hit))
+				{
+					this.character.HandleRayCastHit(hit, () =>
+					{
+						inventory.Reload();
+					});
 				}
 			}
 		}
@@ -135,7 +115,7 @@ namespace Miner
 
 		public void ExperienceEarned(SkillType skill)
 		{
-				skillsPanel.Reload();
+			skillsPanel.Reload();
 		}
 
 		private void LoadMap()
@@ -149,7 +129,7 @@ namespace Miner
 			// 2
 			BinaryFormatter bf = new BinaryFormatter();
 			FileStream file = File.Create(Application.persistentDataPath + "/gamesave.save");
-			bf.Serialize(file, playerData);
+			bf.Serialize(file, character.playerData);
 			file.Close();
 
 			Debug.Log("Game Saved");
@@ -172,9 +152,9 @@ namespace Miner
 					}
 					else
 					{
-						playerData.Inventory = user.Inventory;
-						playerData.Bank = user.Bank;
-						playerData.Progress = user.Progress;
+						character.playerData.Inventory = user.Inventory;
+						character.playerData.Bank = user.Bank;
+						character.playerData.Progress = user.Progress;
 
 						var playerPos = new Vector3((float)user.LastLocation.X, (float)user.LastLocation.Y, (float)user.LastLocation.Z);
 
@@ -183,14 +163,14 @@ namespace Miner
 						{
 							playerPos = myNavHit.position;
 						}
-							character.GetComponent<NavMeshAgent>().Warp(playerPos);
+						character.GetComponent<NavMeshAgent>().Warp(playerPos);
 
-						inventoryService = new InventoryService(playerData.Bank, playerData.Inventory, panelBank, inventory);
+						inventoryService = new InventoryService(character.playerData.Bank, character.playerData.Inventory, panelBank, inventory);
 
-						inventory.SetPlayerInventory(playerData.Inventory);
-						panelBank.SetPlayerBank(playerData.Bank);
-						skillsPanel.SetPlayerSkills(playerData.Progress.Skills);
-						craftPanel.playerData = playerData;
+						inventory.SetPlayerInventory(character.playerData.Inventory);
+						panelBank.SetPlayerBank(character.playerData.Bank);
+						skillsPanel.SetPlayerSkills(character.playerData.Progress.Skills);
+						craftPanel.playerData = character.playerData;
 					}
 					LoadMap();
 					ShowHUD(true);
@@ -207,6 +187,7 @@ namespace Miner
 		{
 			this.inventory.Reload();
 		}
+
 		public void InventoryItemClicked(InventoryItem invItem)
 		{
 
@@ -214,123 +195,57 @@ namespace Miner
 			if (panelBank.gameObject.activeSelf)
 			{
 				var i = invItem.Copy(1);
-				if (playerData.Bank.CanAdd(i))
+				character.TransferToBank(i, () =>
 				{
-					StartCoroutine(PlayersApi.TransferToBank("mwnzoller", i.item.id, i.quantity, (user, err) =>
-					{
-						if (err != null)
-						{
-							Debug.LogError(err);
-						}
-						else
-						{
-							playerData.Inventory.Remove(i);
-							playerData.Bank.Store(i);
-
-							panelBank.Reload();
-							inventory.Reload();
-						}
-					}));
-				}
+					panelBank.Reload();
+					inventory.Reload();
+				});
 			}
+
 			// Requirements
 			if (panelRequirements.gameObject.activeSelf)
 			{
 				var i = invItem.Copy(1);
-				if (playerData.Bank.CanAdd(i))
+				if (character.playerData.Bank.CanAdd(i))
 				{
-					//StartCoroutine(PlayersApi.TransferToBank("mwnzoller", i.item.id, i.quantity, (user, err) =>
-					//{
-					//	if (err != null)
-					//	{
-					//		Debug.LogError(err);
-					//	}
-					//	else
-					//	{
-					//		playerData.inventory.Remove(i);
-					//		playerData.bank.Store(i);
-
-					//		panelBank.Reload();
-					//		inventory.Reload();
-					//	}
-					//}));
 					var returnItem = panelRequirements.AddItem(i);
 
 					if (returnItem == null)
 					{
-						playerData.Inventory.Remove(i);
+						character.playerData.Inventory.Remove(i);
 						inventory.Reload();
 					}
 
 					panelRequirements.Reload();
 				}
 			}
+
+			player.InventoryItemClicked(invItem);
+			
 		}
 
 		public void TransferAllToBank()
 		{
 			if (panelBank.gameObject.activeSelf)
 			{
-				StartCoroutine(PlayersApi.TransferAllToBank("mwnzoller", (user, err) =>
+				character.TransferAllToBank(() =>
 				{
-					if (err != null)
-					{
-						Debug.LogError(err);
-					}
-					else
-					{
-
-						var items = playerData.Inventory.InventoryItems;
-						bool canAddAll = true;
-						foreach (var item in items)
-						{
-							if (!playerData.Bank.CanAdd(item))
-							{
-								canAddAll = false;
-								break;
-							}
-						}
-
-						if (canAddAll)
-						{
-							foreach (var item in items)
-							{
-								playerData.Bank.Store(item);
-							}
-							playerData.Inventory.InventoryItems.Clear();
-						}
-
-						panelBank.Reload();
-						inventory.Reload();
-					}
-				}));
+					panelBank.Reload();
+					inventory.Reload();
+				});
 			}
-			}
+		}
 
 		public void BankItemClicked(InventoryItem invItem)
 		{
 			if (panelBank.gameObject.activeSelf)
 			{
 				var i = invItem.Copy(1);
-				if (playerData.Inventory.CanAdd(i))
+				character.TransferToInventory(i, () =>
 				{
-					StartCoroutine(PlayersApi.TransferToInventory("mwnzoller", i.item.id, i.quantity, (user, err) =>
-					{
-						if (err != null)
-						{
-							Debug.LogError(err);
-						}
-						else
-						{
-
-							playerData.Inventory.Store(i);
-							playerData.Bank.Remove(i);
-
-							panelBank.Reload();
-							inventory.Reload();
-						}
-					}));
-				}
+					panelBank.Reload();
+					inventory.Reload();
+				});
 			}
 		}
 	}

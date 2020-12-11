@@ -9,6 +9,10 @@ TagManager:
   - HUD
   - MaterialTarget
   - CraftPanel
+  - BuildingRoof
+  - Enemy
+  - HitText
+  - StatDisplay
   layers:
   - Default
   - TransparentFX

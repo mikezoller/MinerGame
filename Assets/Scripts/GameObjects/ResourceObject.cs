@@ -34,7 +34,6 @@ namespace Miner.GameObjects
 				{
 					OnRefilled();
 				}
-
 			}
 		}
 
@@ -54,7 +53,6 @@ namespace Miner.GameObjects
 		}
 		public IEnumerator DoWork(GameManager gameManager)
 		{
-			var playerData = gameManager.playerData;
 			var player = GameObject.FindGameObjectWithTag("Player");
 			var character = player.GetComponent<Character>();
 
@@ -62,8 +60,6 @@ namespace Miner.GameObjects
 			bool success = false;
 			while (!success)
 			{
-				//Task.Delay(TimeSpan.FromSeconds(interval));
-				//await Task.Yield();
 				success = UnityEngine.Random.Range(0.0f, 1.0f) > result.Probability;
 				yield return new WaitForSeconds((float)result.Interval);
 			}
@@ -79,8 +75,8 @@ namespace Miner.GameObjects
 				}
 				else
 				{
-					playerData.Inventory.Store(inventoryItem);
-					var s = playerData.Progress.Skills.FirstOrDefault(x => x.SkillType == result.Skill);
+					character.playerData.Inventory.Store(inventoryItem);
+					var s = character.playerData.Progress.Skills.FirstOrDefault(x => x.SkillType == result.Skill);
 
 					if (s != null)
 					{

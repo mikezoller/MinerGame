@@ -57,6 +57,7 @@
     <Compile Include="Assets\Scripts\GameObjects\ResourceObject.cs" />
     <Compile Include="Assets\Scripts\Communication\PlayersApi.cs" />
     <Compile Include="Assets\Scripts\CameraDepthTextureMode.cs" />
+    <Compile Include="Assets\Scripts\NPC.cs" />
     <Compile Include="Assets\Scripts\GameObjects\StartMenu.cs" />
     <Compile Include="Assets\Scripts\Helpers\SpriteManager.cs" />
     <Compile Include="Assets\Scripts\GameObjects\Resources\FishingResource.cs" />
@@ -66,8 +67,13 @@
     <Compile Include="Assets\Scripts\Models\Skill.cs" />
     <Compile Include="Assets\Scripts\GameObjects\PlayerSettings.cs" />
     <Compile Include="Assets\Scripts\GameObjects\CraftingObject.cs" />
+    <Compile Include="Assets\Scripts\Models\EnemyData.cs" />
+    <Compile Include="Assets\Scripts\GameObjects\StatDisplay.cs" />
     <Compile Include="Assets\Scripts\Character.cs" />
     <Compile Include="Assets\Scripts\GameObjects\SkillsPanel.cs" />
+    <Compile Include="Assets\Scripts\CombatStats.cs" />
+    <Compile Include="Assets\Scripts\GameObjects\Droppable.cs" />
+    <Compile Include="Assets\Scripts\GameObjects\HitText.cs" />
     <Compile Include="Assets\Scripts\GameObjects\InteractionObject.cs" />
     <Compile Include="Assets\Scripts\Helpers\ItemDatabase.cs" />
     <Compile Include="Assets\Scripts\GameObjects\PanelRequirements.cs" />
@@ -75,8 +81,10 @@
     <Compile Include="Assets\Scripts\GameObjects\Bank.cs" />
     <Compile Include="Assets\Scripts\GameObjects\MessagePanel.cs" />
     <Compile Include="Assets\Scripts\GameObjects\Map.cs" />
+    <Compile Include="Assets\Scripts\Enemy.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\GameObjects\RepairableObstacle.cs" />
+    <Compile Include="Assets\Scripts\Helpers\EnemyDatabase.cs" />
     <Compile Include="Assets\Scripts\GameObjects\ItemCell.cs" />
     <Compile Include="Assets\Scripts\Helpers\RecipeDatabase.cs" />
     <Compile Include="Assets\Scripts\GameObjects\PanelCraft.cs" />
@@ -84,12 +92,13 @@
     <Compile Include="Assets\Scripts\Helpers\InventoryService.cs" />
     <Compile Include="Assets\Scripts\Communication\API.cs" />
     <Compile Include="Assets\Scripts\GameObjects\Resources\MiningResource.cs" />
+    <Compile Include="Assets\Scripts\RayCastHit.cs" />
     <Compile Include="Assets\Scripts\Models\Player.cs" />
     <Compile Include="Assets\Scripts\GameObjects\HUD.cs" />
     <Compile Include="Assets\Scripts\Helpers\ResourceActionDatabase.cs" />
     <Compile Include="Assets\Scripts\Helpers\CameraOrbit.cs" />
-    <Compile Include="Assets\GameCamera.cs" />
     <Compile Include="Assets\Scripts\Models\Item.cs" />
+    <Compile Include="Assets\Scripts\CookingFire.cs" />
   </ItemGroup>
   <ItemGroup>
      <None Include="Assets\Samples\Terrain Tools\0.1.0-preview\Terrain Assets\ThirdPartyNotices.txt" />
@@ -116,6 +125,7 @@
      <None Include="Assets\JsonDotNet\Assemblies\AOT\Newtonsoft.Json.XML" />
      <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
      <None Include="Assets\JsonDotNet\Assemblies\Windows\Newtonsoft.Json.dll" />
+     <None Include="Assets\Polygonal Particles\Assets\Shaders\GradientBackgroundShader.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
@@ -677,6 +687,9 @@
     <Reference Include="Unity.Rider.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Rider.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.2D.Sprite.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.VisualStudio.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.VisualStudio.Editor.dll</HintPath>
     </Reference>
@@ -685,9 +698,6 @@
     </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.2D.Sprite.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

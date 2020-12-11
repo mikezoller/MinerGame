@@ -1,19 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Miner.GameObjects
 {
-    public class HUD : MonoBehaviour
+	public class HUD : MonoBehaviour
     {
         public Inventory inventory;
 		public GameObject bankPanel;
 		public GameObject panelRequirements;
-		GraphicRaycaster m_Raycaster;
-		PointerEventData m_PointerEventData;
-		EventSystem m_EventSystem;
+		private GraphicRaycaster m_Raycaster;
+		private PointerEventData m_PointerEventData;
+		private EventSystem m_EventSystem;
 
 		private void Start()
 		{
@@ -22,7 +21,6 @@ namespace Miner.GameObjects
 			//Fetch the Event System from the Scene
 			m_EventSystem = GetComponent<EventSystem>();
 		}
-
 
 		public void HideExtra()
 		{
@@ -46,14 +44,12 @@ namespace Miner.GameObjects
 			//For every result returned, output the name of the GameObject on the Canvas hit by the Ray
 			foreach (RaycastResult result in results)
 			{
-				Debug.Log("Hit " + result.gameObject.name);
 				didHit = true;
 			}
 			return didHit;
 		}
         public void ToggleInventory()
         {
-
             inventory.gameObject.SetActive(!inventory.gameObject.activeSelf);
         }
     }

@@ -6,13 +6,19 @@ using UnityEngine;
 namespace Miner.Models
 {
 	public enum SkillType
-    {
-        Mining = 0,
-        Smithing = 1,
-        Woodcutting = 2,
-        Fishing = 3,
-        Cooking = 4,
-    }
+	{
+		Mining = 0,
+		Smithing = 1,
+		Woodcutting = 2,
+		Fishing = 3,
+		Cooking = 4,
+		Attack = 5,
+		Defense = 6,
+		Hitpoints = 7,
+		Stamina = 8,
+		Strength = 9,
+		Accuracy = 10,
+	}
 	[Serializable]
 	public class Skill
 	{

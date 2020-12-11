@@ -1,48 +1,158 @@
-﻿using Miner;
+﻿using Assets.Scripts;
+using Assets.Scripts.GameObjects;
+using Miner;
 using Miner.Communication;
-using Miner.GameObjects;
+using Miner.Helpers;
+using Miner.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Tilemaps;
 
 public class Character : MonoBehaviour
 {
-	// Adjust the speed for the application.
-	public float speed = 50.0f;
-
 	// The target (cylinder) position.
-	public Vector3 target;
 	private Animator animator;
-	private int idleHash;
-	private int walkingHash;
 
+
+	public bool isInCombat;
+	public float strikeRate = 2f;
+	public bool isDead;
+	public float respawnRate = 10f; // seconds
+	public int enemyId;
+	private Vector3 respawnLocation;
+	public Enemy opponent;
+	public float interactionRadius = 5f;
 	NavMeshAgent agent;
-	Vector2 smoothDeltaPosition = Vector2.zero;
-	Vector2 velocity = Vector2.zero;
+	private StatDisplay statDisplay;
+	public EquippedItems equippedItems;
+
+	public Vector3 destination { get { return agent.destination; } }
+
+	public Player playerData;
 
 	GameManager gameManager;
+	private CurrentStats currentStats;
 
 	public Coroutine currentAction;
 
 	// Start is called before the first frame update
 	void Start()
-    {
-		target = transform.position;
+	{
 		animator = this.GetComponent<Animator>();
+		currentStats = this.GetComponent<CurrentStats>();
 		agent = GetComponent<NavMeshAgent>();
 		// Don’t update position automatically
-		agent.updatePosition = false;
-
-		idleHash = Animator.StringToHash("Idle");
-		walkingHash = Animator.StringToHash("walking");
+		//agent.updatePosition = false;
 
 		var gc = GameObject.FindGameObjectWithTag("GameController");
 		gameManager = gc.GetComponent<GameManager>();
+		SetClothing();
+
+		if (statDisplay == null)
+		{
+			statDisplay = this.gameObject.AddComponent<StatDisplay>();
+		}
+		var bounds = this.GetComponent<BoxCollider>().bounds;
+		statDisplay.Init(new Vector3(0, bounds.size.y, 0));
 	}
+	public void WalkTo(Vector3 pos)
+	{
+		agent.stoppingDistance = 0;
+		CancelAllActions();
+		isInCombat = false;
+		agent.ResetPath();
+		agent.SetDestination(pos);
+	}
+	public void CancelAllActions()
+	{
+		if (currentAction != null)
+		{
+			StopCoroutine(currentAction);
+			currentAction = null;
+			if (!string.IsNullOrEmpty(activeAnimation))
+			{
+				ClearAnimBool(activeAnimation);
+			}
+			StartAnimation("Idle");
+		}
+		CancelInvoke("Strike");
+	}
+
+	public void HandleRayCastHit(RaycastHit hit, Action callback = null)
+	{
+		var fightable = hit.transform.gameObject.GetComponent<Enemy>();
+		if (fightable != null)
+		{
+			InitiateCombat(fightable);
+		}
+		var droppable = hit.transform.gameObject.GetComponent<Droppable>();
+		if (droppable != null)
+		{
+			var i = droppable.Item.Copy(1);
+			AddToInventory(i, () =>
+			{
+				Destroy(hit.transform.gameObject);
+			},
+			() =>
+			{
+				// TODO: Show fail message 
+			}
+			);
+		}
+		var campfire = hit.transform.gameObject.GetComponent<CookingFire>();
+		if (campfire != null)
+		{
+			var item = gameManager.inventory.GetSelectedItem();
+			if (item != null)
+			{
+				if (campfire.isLit)
+				{
+					InventoryItem result = campfire.Cook(item);
+					// TODO: remove this after implementing Cook Server method
+					// Add cookable, eatable flags to Item
+					RemoveFromInventory(item);
+					AddToInventory(result);
+				}
+			}
+		}
+
+		if (callback != null)
+		{
+			callback();
+		}
+	}
+
+	public void AddToInventory(InventoryItem item, Action success = null, Action fail = null)
+	{
+		if (playerData.Inventory.CanAdd(item))
+		{
+			StartCoroutine(PlayersApi.AddToInventory("mwnzoller", item.item.id, item.quantity, (user, err) =>
+			{
+				if (err != null)
+				{
+					Debug.LogError(err);
+					if (fail != null)
+					{
+						fail();
+					}
+				}
+				else
+				{
+					if (success != null)
+					{
+						success();
+					}
+					playerData.Inventory.Store(item);
+					gameManager.inventory.Reload();
+				}
+			}));
+		}
+	}
+
 	public void SetAnimBool(string trigger)
 	{
 		animator.SetBool(trigger, true);
@@ -63,7 +173,7 @@ public class Character : MonoBehaviour
 		{
 			StopCoroutine(currentAction);
 			currentAction = null;
-			
+
 		}
 		if (!string.IsNullOrEmpty(activeAnimation))
 		{
@@ -90,7 +200,7 @@ public class Character : MonoBehaviour
 		{
 			animator.SetBool(animation, true);
 		}
-			yield return toDo;
+		yield return toDo;
 		if (!string.IsNullOrEmpty(animation))
 		{
 			animator.SetBool(animation, false);
@@ -102,51 +212,452 @@ public class Character : MonoBehaviour
 	// Update is called once per frame
 	void FixedUpdate()
 	{
-		Vector3 worldDeltaPosition = agent.nextPosition - transform.position;
-
-		// Map 'worldDeltaPosition' to local space
-		float dx = Vector3.Dot(transform.right, worldDeltaPosition);
-		float dy = Vector3.Dot(transform.forward, worldDeltaPosition);
-		Vector2 deltaPosition = new Vector2(dx, dy);
-
-		// Low-pass filter the deltaMove
-		float smooth = Mathf.Min(1.0f, Time.deltaTime / 0.15f);
-		smoothDeltaPosition = Vector2.Lerp(smoothDeltaPosition, deltaPosition, smooth);
-
-		// Update velocity if time advances
-		if (Time.deltaTime > 1e-5f)
-			velocity = smoothDeltaPosition / Time.deltaTime;
-
-		bool shouldMove = agent.remainingDistance > agent.radius;
+		bool shouldMove = agent.remainingDistance > agent.stoppingDistance;
 
 		// Update animation parameters
 		if (shouldMove)
 		{
 			animator.SetBool("walking", true);
-			
-		} else if (animator.GetBool("walking"))
+
+		}
+		else if (animator.GetBool("walking"))
 		{
 			StartCoroutine(PlayersApi.UpdateLocation("mwnzoller", this.transform.position));
-
-			var targetPosition = agent.pathEndPosition;
-			var targetPoint = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
-			var _direction = (targetPoint - transform.position).normalized;
-			var _lookRotation = Quaternion.LookRotation(_direction);
-
-			this.transform.LookAt(agent.pathEndPosition, Vector3.up);
-
-			//transform.rotation = new Quaternion(_lookRotation.x, _lookRotation.y, _lookRotation.z, 1);
 			animator.SetBool("walking", false);
 		}
 
-		//LookAt lookAt = GetComponent<LookAt>();
-		//if (lookAt)
-		//	lookAt.lookAtTargetPosition = agent.steeringTarget + transform.forward;
+		if (isInCombat)
+		{
+			this.transform.LookAt(this.opponent.transform);
+			if (Vector3.Distance(this.transform.position, this.opponent.transform.position) > interactionRadius)
+			{
+				agent.stoppingDistance = interactionRadius;
+				agent.SetDestination(opponent.transform.position);
+			}
+		}
 	}
 
-	void OnAnimatorMove()
+	public enum BodyPart
 	{
-		// Update position to agent position
-		transform.position = agent.nextPosition;
+		Head,
+		Arms,
+		Hands,
+		Chest,
+		Legs,
+		Feet,
+	}
+
+	#region Clothing
+	public enum ClothingType
+	{
+		Body,
+		Clothing1,
+		Armor1,
+		All
+	}
+
+	private Dictionary<BodyPart, string> bodyPartDict = new Dictionary<BodyPart, string>
+	{
+		{ BodyPart.Head, "Head" },
+		{ BodyPart.Arms, "Arms" },
+		{ BodyPart.Hands, "Hands" },
+		{ BodyPart.Chest, "Chest" },
+		{ BodyPart.Legs, "Legs" },
+		{ BodyPart.Feet, "Feet" },
+	};
+
+
+	public void RemoveAllClothing()
+	{
+		foreach (var t in bodyPartDict.Keys)
+		{
+			RemoveBodyPartClothing(t);
+		}
+	}
+
+	public void RemoveBodyPartClothing(BodyPart bodyPart)
+	{
+		SetBodyPartClothing(bodyPart, ClothingType.All, false);
+		SetBodyPartClothing(bodyPart, ClothingType.Body, true);
+	}
+	public void SetClothing()
+	{
+		RemoveAllClothing();
+		SetBodyPartClothing(BodyPart.Legs, ClothingType.Armor1, true);
+		SetSkinColor(Color.red);
+	}
+
+	public void SetSkinColor(Color color)
+	{
+		var body = this.transform.Find("Body");
+
+		var bodyParts = Enum.GetValues(typeof(BodyPart));
+		foreach (BodyPart bodyPart in bodyParts)
+		{
+			var bodyPartRoot = body.Find(bodyPart.ToString());
+			string bpString = bodyPart.ToString() + "Body";
+			var bp = bodyPartRoot.Find(bpString);
+			var renderer = bp.GetComponent<SkinnedMeshRenderer>();
+			renderer.material.color = color;
+		}
+	}
+	private void SetBodyPartClothing(BodyPart bodyPart, ClothingType clothingType, bool active)
+	{
+		var body = this.transform.Find("Body");
+
+		var bp = body.Find(bodyPart.ToString());
+		if (clothingType == ClothingType.All)
+		{
+			for (var i = 0; i < bp.childCount; i++)
+			{
+				var child = bp.GetChild(i);
+				child.gameObject.SetActive(active);
+			}
+		}
+		else
+		{
+			// Hide the rest of this body part clothing
+			if (active)
+			{
+				SetBodyPartClothing(bodyPart, ClothingType.All, false);
+			}
+			var item = bp.Find(bodyPart.ToString() + clothingType.ToString());
+			item.gameObject.SetActive(active);
+		}
+	}
+	#endregion Clothing
+
+	#region Combat
+	private bool InitiateCombat(Enemy opponent)
+	{
+		if (CanFight(opponent) && opponent.CanFight(this))
+		{
+			statDisplay.ShowHealthBar(true);
+			agent.stoppingDistance = interactionRadius;
+			agent.SetDestination(opponent.destination);
+			DoAction(opponent.destination, null, StartFight(opponent), interactionRadius);
+		}
+
+		return isInCombat;
+	}
+
+	private IEnumerator StartFight(Enemy opponent)
+	{
+		isInCombat = true;
+		this.opponent = opponent;
+		CancelInvoke("Strike");
+		InvokeRepeating("Strike", 1, strikeRate);
+		yield return null;
+	}
+
+	public void StopFight()
+	{
+		this.isInCombat = false;
+		statDisplay.ShowHealthBar(false);
+		CancelInvoke("Strike");
+	}
+
+	public void ReceiveDamage(Enemy enemy, int amount)
+	{
+		if (CanFight(enemy))
+		{
+			DoAction(opponent.transform.position, null, StartFight(enemy), interactionRadius);
+		}
+		StartCoroutine(PlayersApi.DoCombatAction("mwnzoller", 401, amount, (user, err) =>
+		{
+			if (err != null)
+			{
+				Debug.LogError("error syncing with server!");
+			}
+			else
+			{
+				var s = this.playerData.Progress.Skills.FirstOrDefault(x => x.SkillType == SkillType.Hitpoints);
+
+				if (s != null)
+				{
+					s.AddExperience(amount);
+					SendMessageUpwards("ExperienceEarned", SkillType.Hitpoints);
+				}
+
+				statDisplay.AddHit(amount);
+				this.currentStats.health -= amount;
+				UpdateHealthBar();
+				isDead = this.currentStats.health <= 0;
+
+				if (isDead)
+				{
+					StopFight();
+
+					// Start respawn timer
+					Invoke("Respawn", 1f);
+				}
+			}
+		}));
+	}
+
+	public void DoDamage(int amount)
+	{
+		var rand = UnityEngine.Random.Range(0, 100);
+		if (rand <= this.opponent.enemyData.Defense)
+		{
+			amount = 0;
+			this.opponent.ReceiveDamage(this, amount);
+		}
+		else
+		{
+			StartCoroutine(PlayersApi.DoCombatAction("mwnzoller", 400, amount, (user, err) =>
+			{
+				if (err != null)
+				{
+					Debug.LogError("error syncing with server!");
+				}
+				else
+				{
+					var s = this.playerData.Progress.Skills.FirstOrDefault(x => x.SkillType == SkillType.Attack);
+
+					if (s != null)
+					{
+						s.AddExperience(amount);
+						SendMessageUpwards("ExperienceEarned", SkillType.Attack);
+					}
+					this.opponent.ReceiveDamage(this, amount);
+				}
+			}));
+		}
+	}
+	#endregion Combat
+
+	public void Respawn()
+	{
+		this.gameObject.transform.position = respawnLocation;
+		this.currentStats.health = this.playerData.Progress.GetFullHeath();
+		UpdateHealthBar();
+		isDead = false;
+		this.gameObject.SetActive(true);
+	}
+
+	private void UpdateHealthBar()
+	{
+		this.statDisplay.SetHealth(this.playerData.Progress.GetFullHeath(), this.currentStats.health);
+	}
+
+	public void Strike()
+	{
+		if (this.opponent != null && !this.opponent.isDead)
+		{
+			if (!this.opponent.isInCombat)
+			{
+				InitiateCombat(this.opponent);
+			}
+			StartAnimation("striking");
+			var acc = playerData.Progress.GetAccuracy();
+			bool hit = UnityEngine.Random.Range(0, 100) < acc;
+			int amount = 0;
+			if (hit)
+			{
+				var strength = playerData.Progress.GetStrength();
+				amount = (int)Math.Ceiling(UnityEngine.Random.Range(0.0f, 1.0f) * strength);
+			}
+			this.DoDamage(amount);
+		}
+		else
+		{
+			StopFight();
+		}
+	}
+
+	private void RemoveFromInventory(InventoryItem invItem, Action success = null, Action fail = null)
+	{
+		if (playerData.Inventory.HasAtLeast(invItem.item.id, invItem.quantity))
+		{
+			StartCoroutine(PlayersApi.RemoveFromInventory("mwnzoller", invItem.item.id, invItem.quantity, (user, err) =>
+			{
+				if (err != null)
+				{
+					Debug.LogError(err);
+					if (fail != null)
+					{
+						fail();
+					}
+				}
+				else
+				{
+					if (success != null)
+					{
+						success();
+					}
+					playerData.Inventory.Remove(invItem);
+					gameManager.inventory.Reload();
+				}
+			}));
+		}
+	}
+
+	public void StartFire(InventoryItem item)
+	{
+		RemoveFromInventory(item, () =>
+		{
+			var o = (GameObject)Instantiate(Resources.Load("Prefabs\\campfire"), this.transform.position, Quaternion.identity);
+			var cookingFire = o.AddComponent<CookingFire>();
+			DoAction(transform.position, null, cookingFire.Light(playerData));
+		});
+	}
+
+	public bool CanFight(Enemy o)
+	{
+		return !isInCombat || (this.opponent == o);
+	}
+
+	public void TransferToInventory(InventoryItem item, Action success = null, Action fail = null)
+	{
+		if (playerData.Inventory.CanAdd(item))
+		{
+			StartCoroutine(PlayersApi.TransferToInventory("mwnzoller", item.item.id, item.quantity, (user, err) =>
+			{
+				if (err != null)
+				{
+					Debug.LogError(err);
+					if (fail != null) fail();
+				}
+				else
+				{
+					playerData.Inventory.Store(item);
+					playerData.Bank.Remove(item);
+					if (success != null) success();
+				}
+			}));
+		}
+	}
+	public void TransferToBank(InventoryItem item, Action success = null, Action fail = null)
+	{
+		if (playerData.Bank.CanAdd(item))
+		{
+			StartCoroutine(PlayersApi.TransferToBank("mwnzoller", item.item.id, item.quantity, (user, err) =>
+			{
+				if (err != null)
+				{
+					Debug.LogError(err);
+					if (fail != null) fail();
+				}
+				else
+				{
+					playerData.Inventory.Remove(item);
+					playerData.Bank.Store(item);
+
+					if (success != null) success();
+				}
+			}));
+		}
+	}
+	public void TransferAllToBank(Action success = null, Action fail = null)
+	{
+		StartCoroutine(PlayersApi.TransferAllToBank("mwnzoller", (user, err) =>
+		{
+			if (err != null)
+			{
+				Debug.LogError(err);
+				if (fail != null) fail();
+			}
+			else
+			{
+
+				var items = playerData.Inventory.InventoryItems;
+				bool canAddAll = true;
+				foreach (var item in items)
+				{
+					if (!playerData.Bank.CanAdd(item))
+					{
+						canAddAll = false;
+						break;
+					}
+				}
+
+				if (canAddAll)
+				{
+					foreach (var item in items)
+					{
+						playerData.Bank.Store(item);
+					}
+					playerData.Inventory.InventoryItems.Clear();
+				}
+				if (success != null) success();
+
+			}
+		}));
+	}
+
+	private void SetHealth(int amount, Action success = null, Action fail = null)
+	{
+		// Send to server
+		StartCoroutine(PlayersApi.SetHealth("mwnzoller", amount, (user, err) =>
+		{
+			if (err != null)
+			{
+				Debug.LogError(err);
+				if (fail != null) fail();
+			}
+			else
+			{
+				if (success != null) success();
+			}
+		}));
+	}
+
+	public void InventoryItemClicked(InventoryItem invItem)
+	{
+		ItemTypes itemType = invItem.item.ItemType;
+
+		if (itemType == ItemTypes.Food)
+		{
+			FoodData data = JsonConvert.DeserializeObject<FoodData>(invItem.item.ItemData);
+			currentStats.AddHealth(data.HealAmount);
+			SetHealth(currentStats.health, () =>
+			{
+				RemoveFromInventory(invItem);
+			});
+		}
+		if (invItem.item.id >= 200 && invItem.item.id < 250)
+		{
+			StartFire(invItem);
+		}
+	}
+	public enum EquipmentSpot
+	{
+		Head,
+		Arms,
+		Hands,
+		Chest,
+		Legs,
+		Feet,
+		Weapon,
+		Shield
+	}
+	public class EquippedItems
+	{
+		public Item Head { get; set; }
+		public Item Arms { get; set; }
+		public Item Hands { get; set; }
+		public Item Chest { get; set; }
+		public Item Legs { get; set; }
+		public Item Feet { get; set; }
+		public Item Weapon { get; set; }
+		public Item Shield { get; set; }
+
+		public int GetTotalDefense()
+		{
+			int defense = 0;
+			foreach (Item item in new[] { Head, Arms, Hands, Chest, Legs, Feet })
+			{
+				if (item != null)
+				{
+					var armorData = JsonConvert.DeserializeObject<ArmorData>(item.ItemData);
+					if (armorData != null)
+					{
+						defense += armorData.GetDefense();
+					}
+				}
+			}
+			return defense;
+		}
 	}
 }

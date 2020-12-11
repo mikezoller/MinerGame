@@ -25,6 +25,10 @@ namespace Miner.Helpers
             return items.Find(item => item.id == id);
         }
 
+		public static string GetModelPath(int id)
+		{
+			return $"items/" + id;
+		}
 
 		private static void BuildItemDatabase()
 		{

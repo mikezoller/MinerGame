@@ -39,7 +39,7 @@ namespace Miner.Models
 			}
 			else
 			{
-				if (InventoryItems.Count(x=>x.item.id == itemId) < quantity)
+				if (InventoryItems.Count(x => x.item.id == itemId) < quantity)
 				{
 					hasAtLeast = false;
 				}
@@ -53,7 +53,7 @@ namespace Miner.Models
 			bool canAdd = true;
 			if (invItem.item.stackable || allowStackingAll)
 			{
-				if (InventoryItems.FirstOrDefault(x=>x.item.id == invItem.item.id) == null && InventoryItems.Count + 1 > Size)
+				if (InventoryItems.FirstOrDefault(x => x.item.id == invItem.item.id) == null && InventoryItems.Count + 1 > Size)
 				{
 					canAdd = false;
 				}
@@ -165,22 +165,6 @@ namespace Miner.Models
 	}
 
 	[Serializable]
-	public class InventoryItem
-	{
-		public Item item { get; set; }
-		public int quantity { get; set; }
-
-		public InventoryItem Copy(int qty)
-		{
-			return new InventoryItem()
-			{
-				item = this.item,
-				quantity = qty
-			};
-		}
-	}
-
-	[Serializable]
 	public class Inventory : ItemContainer
 	{
 		public override int Size => 24;
@@ -205,10 +189,56 @@ namespace Miner.Models
 	{
 		public List<Skill> Skills { get; set; } = new List<Skill>();
 
-		public Progress() 
+		public Progress()
 		{
 		}
+
+		public int GetFullHeath()
+		{
+			var hp = GetSkill(SkillType.Hitpoints);
+			return 10 + hp.Level * 2;
+		}
+		public int GetAttack()
+		{
+			var attack = GetSkill(SkillType.Attack);
+			return attack.Level;
+		}
+		public int GetStrength()
+		{
+			var strength = GetSkill(SkillType.Strength);
+			return strength.Level;
+		}
+		public int GetDefense()
+		{
+			var defense = GetSkill(SkillType.Defense);
+			return defense.Level;
+		}
+		public int GetAccuracy()
+		{
+			var acc = GetSkill(SkillType.Accuracy);
+			return 50 + acc.Level / 2;
+		}
+		public int GetSkillLevel(SkillType skillType)
+		{
+			var skill = GetSkill(skillType);
+			return skill.Level;
+		}
+		public Skill GetSkill(SkillType skillType)
+		{
+			Skill skill = Skills.FirstOrDefault(x => x.SkillType == skillType);
+			if (skill == null)
+			{
+				skill = new Skill()
+				{
+					SkillType = skillType,
+					Name = skillType.ToString(),
+					Experience = 0
+				};
+			}
+			return skill;
+		}
 	}
+
 	[Serializable]
 	public class Player
 	{

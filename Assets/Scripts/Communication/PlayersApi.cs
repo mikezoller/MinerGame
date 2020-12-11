@@ -88,6 +88,31 @@ namespace Miner.Communication
 			}
 			return null;
 		}
+		public static IEnumerator DoCombatAction(
+			string playerName, int actionId, int amount,
+			Action<bool, string> doneCallback = null)
+		{
+			var done = wrapCallback(doneCallback);
+			try
+			{
+				return Post(path(GET_PLAYER_PATH + "/DoCombatAction"), new
+				{ playerName, actionId, amount },
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(false, requestError(request));
+						else
+							done(requestResponse<bool>(request), null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(false, ex.Message);
+			}
+			return null;
+		}
 		public static IEnumerator DoRecipe(
 			string playerName, int recipeId,
 			Action<bool, string> doneCallback = null)
@@ -208,6 +233,57 @@ namespace Miner.Communication
 			{
 				return Post(path(GET_PLAYER_PATH + "/MoveToInventory"), new
 				{ playerName, itemId, quantity },
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(false, requestError(request));
+						else
+							done(requestResponse<bool>(request), null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(false, ex.Message);
+			}
+			return null;
+		}
+		public static IEnumerator AddToInventory(
+			string playerName, int itemId, int quantity,
+			Action<bool, string> doneCallback = null)
+		{
+			var done = wrapCallback(doneCallback);
+
+			try
+			{
+				return Post(path(GET_PLAYER_PATH + "/AddToInventory"), new
+				{ playerName, itemId, quantity },
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(false, requestError(request));
+						else
+							done(requestResponse<bool>(request), null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(false, ex.Message);
+			}
+			return null;
+		}
+		public static IEnumerator SetHealth(
+			string playerName, int amount,
+			Action<bool, string> doneCallback = null)
+		{
+			var done = wrapCallback(doneCallback);
+			try
+			{
+				return Post(path(GET_PLAYER_PATH + "/SetHealth"), new
+				{ playerName, amount },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Miner.Models;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +10,6 @@ namespace Miner.GameObjects
     {
         public ItemGrid itemGrid;
         Miner.Models.Inventory playerInventory;
-
         public Button editButton;
 
         public bool Editing = false;
@@ -39,6 +39,15 @@ namespace Miner.GameObjects
         }
 
         private ItemCell selectedCell;
+		public InventoryItem GetSelectedItem()
+		{
+			InventoryItem item = null;
+			if (selectedCell != null)
+			{
+				item = selectedCell.item;
+			}
+			return item;
+		}
         public void ItemClicked(ItemCell cell)
         {
             if (Editing)

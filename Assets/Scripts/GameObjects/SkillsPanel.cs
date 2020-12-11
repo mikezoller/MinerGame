@@ -1,4 +1,5 @@
 ﻿using Miner.Models;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,21 +7,21 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace Miner.GameObjects
 {
-    public class SkillsPanel : MonoBehaviour
-    {
-        List<Skill> Skills;
+	public class SkillsPanel : MonoBehaviour
+	{
+		List<Skill> Skills;
 
-        // Start is called before the first frame update
-        void Start()
-        {
+		// Start is called before the first frame update
+		void Start()
+		{
 
-        }
+		}
 
-        // Update is called once per frame
-        void Update()
-        {
+		// Update is called once per frame
+		void Update()
+		{
 
-        }
+		}
 
 		public void SetPlayerSkills(List<Skill> skills)
 		{
@@ -30,22 +31,33 @@ namespace Miner.GameObjects
 
 		public void Reload()
 		{
-			GameObject valMining = GameObject.Find("valMining");
-			var text = valMining.GetComponent<Text>();
-			var mining = Skills.FirstOrDefault(x => x.SkillType == SkillType.Mining);
-
-			if (mining != null)
+			var allSkills = Enum.GetValues(typeof(SkillType));
+			foreach(SkillType skill in allSkills)
 			{
-				text.text = mining.Experience.ToString() + " : " + mining.Level.ToString();
-			}
-
-			var wc = Skills.FirstOrDefault(x => x.SkillType == SkillType.Woodcutting);
-			GameObject valWoodcutting = GameObject.Find("valWoodcutting");
-			text = valWoodcutting.GetComponent<Text>();
-			if (wc != null)
-			{
-				text.text = wc.Experience.ToString() + " : " + wc.Level.ToString();
+				ReloadSkill(skill);
 			}
 		}
-    }
+
+		public void ReloadSkill(SkillType skillType)
+		{
+			var skill = Skills.FirstOrDefault(x => x.SkillType == skillType);
+			if (skill == null)
+			{
+				skill = new Skill()
+				{
+					Name = skillType.ToString(),
+					Description = skillType.ToString(),
+					SkillType = skillType,
+					Experience = 0
+				};
+				Skills.Add(skill);
+			}
+			GameObject vallSkill = GameObject.Find("val" + skillType.ToString());
+			if (vallSkill != null)
+			{
+				Text text = vallSkill.GetComponent<Text>();
+				text.text = skill.Experience.ToString() + " : " + skill.Level.ToString();
+			}
+		}
+	}
 }

@@ -17,7 +17,7 @@ public class CameraOrbit : MonoBehaviour
 	public float distanceMax = 15f;
 	public float zoomSpeed = 15f;
 
-	private Rigidbody rigidbody;
+	private new Rigidbody rigidbody;
 
 	float x = 0.0f;
 	float y = 0.0f;
@@ -51,11 +51,6 @@ public class CameraOrbit : MonoBehaviour
 
 			distance = Mathf.Clamp(distance - Input.GetAxis("Mouse ScrollWheel") * zoomSpeed, distanceMin, distanceMax);
 
-			//RaycastHit hit;
-			//if (Physics.Linecast(target.position, transform.position, out hit))
-			//{
-			//	distance -= hit.distance;
-			//}
 			Vector3 negDistance = new Vector3(0.0f, 0.0f, -distance);
 			Vector3 position = rotation * negDistance + target.position;
 
@@ -66,10 +61,8 @@ public class CameraOrbit : MonoBehaviour
 
 	public static float ClampAngle(float angle, float min, float max)
 	{
-		if (angle < -360F)
-			angle += 360F;
-		if (angle > 360F)
-			angle -= 360F;
+		if (angle < -360F) angle += 360F;
+		if (angle > 360F) angle -= 360F;
 		return Mathf.Clamp(angle, min, max);
 	}
 }
