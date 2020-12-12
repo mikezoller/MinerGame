@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System;
 using System.Collections;
 using Miner.Models;
+using static Miner.Communication.MultiActionRequest;
 
 namespace Miner.Communication
 {
@@ -300,5 +301,58 @@ namespace Miner.Communication
 			}
 			return null;
 		}
+
+		public static IEnumerator DoMultipleActions(
+			string playerName, List<SimpleActionRequest> requests,
+			Action<bool, string> doneCallback = null)
+		{
+			var done = WrapCallback(doneCallback);
+
+			try
+			{
+				return Post(Path(GET_PLAYER_PATH + "/MultiAction"), new
+				{ playerName, requests },
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(false, RequestError(request));
+						else
+							done(true, null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(false, ex.Message);
+			}
+			return null;
+		}
+	}
+
+	[Serializable]
+	public class MultiActionRequest
+	{
+		public enum ActionType
+		{
+			SetHealth,
+			AddAttackExperience,
+			AddDefenseExperience
+		}
+
+		public List<SimpleActionRequest> Requests { get; set; }
+		public string PlayerName { get; set; }
+
+		public static SimpleActionRequest GetSimpleRequest(ActionType type, int amount)
+		{
+			return new SimpleActionRequest() { ActionType = type, Amount = amount };
+		}
+	}
+
+	[Serializable]
+	public class SimpleActionRequest
+	{
+		public ActionType ActionType { get; set; }
+		public int Amount { get; set; }
 	}
 }

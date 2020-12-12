@@ -356,7 +356,13 @@ public class Character : MonoBehaviour
 		{
 			DoAction(opponent.transform.position, null, StartFight(enemy), interactionRadius);
 		}
-		StartCoroutine(PlayersApi.DoCombatAction("mwnzoller", 401, amount, (success, err) =>
+		List<SimpleActionRequest> requests = new List<SimpleActionRequest>()
+		{
+			MultiActionRequest.GetSimpleRequest(MultiActionRequest.ActionType.SetHealth, this.playerData.CurrentStats.Health - amount),
+			MultiActionRequest.GetSimpleRequest(MultiActionRequest.ActionType.AddDefenseExperience,  amount),
+		};
+
+		StartCoroutine(PlayersApi.DoMultipleActions("mwnzoller", requests, (success, err) =>
 		{
 			if (err != null)
 			{
