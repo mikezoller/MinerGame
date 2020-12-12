@@ -70,6 +70,9 @@ public class NPC : MonoBehaviour
 	void OnAnimatorMove()
 	{
 		// Update position to agent position
-		transform.position = agent.nextPosition;
+		if (agent != null)
+		{
+			transform.position = agent.nextPosition;
+		}
 	}
 }

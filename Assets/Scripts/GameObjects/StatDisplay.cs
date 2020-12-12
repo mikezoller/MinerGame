@@ -22,8 +22,10 @@ namespace Assets.Scripts.GameObjects
 
 		public void Init(Vector3 pos)
 		{
-			go = new GameObject("StatDisplay");
-			go.tag = "StatDisplay";
+			go = new GameObject("StatDisplay")
+			{
+				tag = "StatDisplay"
+			};
 			go.transform.parent = gameObject.transform;
 			go.transform.localPosition = pos;
 			AddHealthBar();
@@ -35,8 +37,10 @@ namespace Assets.Scripts.GameObjects
 			var greenBar = new GameObject("GreenBar");
 			var meshFilterRed = healthBar.AddComponent<MeshFilter>();
 			var meshFilterGreen = greenBar.AddComponent<MeshFilter>();
+
 			healthBar.AddComponent<MeshRenderer>();
 			greenBar.AddComponent<MeshRenderer>();
+
 			this.tileMeshRed = new Mesh();
 			this.tileMeshGreen = new Mesh();
 			Vector3[] vertices = new Vector3[]
@@ -68,11 +72,14 @@ namespace Assets.Scripts.GameObjects
 				healthBarRed = UnityEngine.Resources.Load<Material>("Materials\\HealthBarRed");
 				healthBarGreen = UnityEngine.Resources.Load<Material>("Materials\\HealthBarGreen");
 			}
-			healthBar.GetComponent<MeshFilter>().mesh = this.tileMeshRed;
+			meshFilterRed.mesh = this.tileMeshRed;
 			healthBar.GetComponent<MeshRenderer>().material = healthBarRed;
-			greenBar.GetComponent<MeshFilter>().mesh = tileMeshGreen;
+
+			meshFilterGreen.mesh = tileMeshGreen;
 			greenBar.GetComponent<MeshRenderer>().material = healthBarGreen;
 			greenBar.transform.parent = healthBar.transform;
+			greenBar.transform.localPosition = new Vector3(0, 0, 0.00001f); // To make it on top of red
+
 			healthBar.transform.parent = go.transform;
 			healthBar.transform.localPosition = new Vector3(0, 0, 0);
 
@@ -98,8 +105,10 @@ namespace Assets.Scripts.GameObjects
 
 		public void AddHit(int amount)
 		{
-			var hitTextGo = new GameObject("HitText");
-			hitTextGo.tag = "HitText";
+			var hitTextGo = new GameObject("HitText")
+			{
+				tag = "HitText"
+			};
 
 			HitText hitText = hitTextGo.AddComponent<HitText>();
 			hitText.Init(amount);
@@ -117,7 +126,7 @@ namespace Assets.Scripts.GameObjects
 		{
 			var transform = Camera.main.transform;
 			var cameraCenter = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane));
-			transform.position = transform.position + (cameraCenter - gameObject.transform.position);
+			transform.position += (cameraCenter - gameObject.transform.position);
 			go.transform.LookAt(transform, Vector3.up);
 			go.transform.Rotate(0, 180, 0);
 		}

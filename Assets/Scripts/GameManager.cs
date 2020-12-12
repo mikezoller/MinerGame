@@ -1,18 +1,10 @@
-﻿using Assets.Scripts;
-using Assets.Scripts.GameObjects;
-using Assets.Scripts.Helpers;
-using Miner.Communication;
+﻿using Assets.Scripts.Helpers;
 using Miner.GameObjects;
-using Miner.Helpers;
 using Miner.Models;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace Miner
 {
@@ -20,25 +12,32 @@ namespace Miner
 	{
 		// UI 
 		public StartMenu startMenu;
+		public HUD hud;
 		public SkillsPanel skillsPanel;
 		public GameObjects.Inventory inventory;
-		public Map map;
-		public HUD hud;
 		public MessagePanel messagePanel;
 		public PanelCraft craftPanel;
 		public GameObjects.Bank panelBank;
 		public GameObjects.PanelRequirements panelRequirements;
+		public GameObject panelLoading;
+
 		public Character character;
-
-		// Services
-		private InventoryService inventoryService;
-
-
 		// Start is called before the first frame update
 		public void Start()
 		{
+			NavMeshHit myNavHit;
+			if (NavMesh.SamplePosition(character.initialPosition, out myNavHit, 100, -1))
+			{
+				character.initialPosition = myNavHit.position;
+			}
+			character.GetComponent<NavMeshAgent>().Warp(character.initialPosition);
 
-			LoadGame();
+
+			inventory.SetPlayerInventory(character.playerData.Inventory);
+			panelBank.SetPlayerBank(character.playerData.Bank);
+			skillsPanel.SetPlayerSkills(character.playerData.Progress.Skills);
+			craftPanel.playerData = character.playerData;
+
 			messagePanel.HideMessage();
 			panelBank.gameObject.SetActive(false);
 			panelRequirements.gameObject.SetActive(false);
@@ -46,6 +45,7 @@ namespace Miner
 			cpgo.SetActive(false);
 			craftPanel = cpgo.GetComponent<PanelCraft>();
 
+			ShowHUD(true);
 
 		}
 
@@ -118,11 +118,6 @@ namespace Miner
 			skillsPanel.Reload();
 		}
 
-		private void LoadMap()
-		{
-			//Instantiate(map, new Vector3(0, 0, 0), Quaternion.identity);
-
-		}
 
 		public void SaveGame()
 		{
@@ -135,53 +130,7 @@ namespace Miner
 			Debug.Log("Game Saved");
 		}
 
-		public void LoadGame()
-		{
-			if (File.Exists(Application.persistentDataPath + "/gamesave.save"))
-			{
-				BinaryFormatter bf = new BinaryFormatter();
-				FileStream file = File.Open(Application.persistentDataPath + "/gamesave.save", FileMode.Open);
-				//playerData = (PlayerData)bf.Deserialize(file);
-				file.Close();
-
-				StartCoroutine(PlayersApi.Get("mwnzoller", (user, err) =>
-				{
-					if (err != null)
-					{
-						Debug.LogError(err);
-					}
-					else
-					{
-						character.playerData.Inventory = user.Inventory;
-						character.playerData.Bank = user.Bank;
-						character.playerData.Progress = user.Progress;
-
-						var playerPos = new Vector3((float)user.LastLocation.X, (float)user.LastLocation.Y, (float)user.LastLocation.Z);
-
-						NavMeshHit myNavHit;
-						if (NavMesh.SamplePosition(playerPos, out myNavHit, 100, -1))
-						{
-							playerPos = myNavHit.position;
-						}
-						character.GetComponent<NavMeshAgent>().Warp(playerPos);
-
-						inventoryService = new InventoryService(character.playerData.Bank, character.playerData.Inventory, panelBank, inventory);
-
-						inventory.SetPlayerInventory(character.playerData.Inventory);
-						panelBank.SetPlayerBank(character.playerData.Bank);
-						skillsPanel.SetPlayerSkills(character.playerData.Progress.Skills);
-						craftPanel.playerData = character.playerData;
-					}
-					LoadMap();
-					ShowHUD(true);
-				}));
-
-			}
-			else
-			{
-				Debug.Log("No game saved!");
-			}
-		}
+		
 
 		public void ReloadInventory()
 		{
@@ -220,8 +169,8 @@ namespace Miner
 				}
 			}
 
-			player.InventoryItemClicked(invItem);
-			
+			character.InventoryItemClicked(invItem);
+
 		}
 
 		public void TransferAllToBank()

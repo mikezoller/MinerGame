@@ -29,21 +29,20 @@ public class Character : MonoBehaviour
 	NavMeshAgent agent;
 	private StatDisplay statDisplay;
 	public EquippedItems equippedItems;
-
-	public Vector3 destination { get { return agent.destination; } }
+	public Vector3 initialPosition;
+	public Vector3 Destination { get { return agent.destination; } }
 
 	public Player playerData;
 
 	GameManager gameManager;
-	private CurrentStats currentStats;
 
 	public Coroutine currentAction;
+
 
 	// Start is called before the first frame update
 	void Start()
 	{
 		animator = this.GetComponent<Animator>();
-		currentStats = this.GetComponent<CurrentStats>();
 		agent = GetComponent<NavMeshAgent>();
 		// Don’t update position automatically
 		//agent.updatePosition = false;
@@ -58,6 +57,7 @@ public class Character : MonoBehaviour
 		}
 		var bounds = this.GetComponent<BoxCollider>().bounds;
 		statDisplay.Init(new Vector3(0, bounds.size.y, 0));
+		UpdateHealthBar();
 	}
 	public void WalkTo(Vector3 pos)
 	{
@@ -89,9 +89,10 @@ public class Character : MonoBehaviour
 		{
 			InitiateCombat(fightable);
 		}
-		var droppable = hit.transform.gameObject.GetComponent<Droppable>();
-		if (droppable != null)
+		var droppable = hit.transform.gameObject.GetComponent<DroppableComponent>();
+		if (droppable != null && !droppable.Claimed)
 		{
+			droppable.Claimed = true;
 			var i = droppable.Item.Copy(1);
 			AddToInventory(i, () =>
 			{
@@ -120,10 +121,7 @@ public class Character : MonoBehaviour
 			}
 		}
 
-		if (callback != null)
-		{
-			callback();
-		}
+		callback?.Invoke();
 	}
 
 	public void AddToInventory(InventoryItem item, Action success = null, Action fail = null)
@@ -135,17 +133,11 @@ public class Character : MonoBehaviour
 				if (err != null)
 				{
 					Debug.LogError(err);
-					if (fail != null)
-					{
-						fail();
-					}
+					fail?.Invoke();
 				}
 				else
 				{
-					if (success != null)
-					{
-						success();
-					}
+					success?.Invoke();
 					playerData.Inventory.Store(item);
 					gameManager.inventory.Reload();
 				}
@@ -256,7 +248,7 @@ public class Character : MonoBehaviour
 		All
 	}
 
-	private Dictionary<BodyPart, string> bodyPartDict = new Dictionary<BodyPart, string>
+	private readonly Dictionary<BodyPart, string> bodyPartDict = new Dictionary<BodyPart, string>
 	{
 		{ BodyPart.Head, "Head" },
 		{ BodyPart.Arms, "Arms" },
@@ -334,8 +326,8 @@ public class Character : MonoBehaviour
 		{
 			statDisplay.ShowHealthBar(true);
 			agent.stoppingDistance = interactionRadius;
-			agent.SetDestination(opponent.destination);
-			DoAction(opponent.destination, null, StartFight(opponent), interactionRadius);
+			agent.SetDestination(opponent.Destination);
+			DoAction(opponent.Destination, null, StartFight(opponent), interactionRadius);
 		}
 
 		return isInCombat;
@@ -353,6 +345,7 @@ public class Character : MonoBehaviour
 	public void StopFight()
 	{
 		this.isInCombat = false;
+		this.opponent = null;
 		statDisplay.ShowHealthBar(false);
 		CancelInvoke("Strike");
 	}
@@ -363,7 +356,7 @@ public class Character : MonoBehaviour
 		{
 			DoAction(opponent.transform.position, null, StartFight(enemy), interactionRadius);
 		}
-		StartCoroutine(PlayersApi.DoCombatAction("mwnzoller", 401, amount, (user, err) =>
+		StartCoroutine(PlayersApi.DoCombatAction("mwnzoller", 401, amount, (success, err) =>
 		{
 			if (err != null)
 			{
@@ -380,16 +373,16 @@ public class Character : MonoBehaviour
 				}
 
 				statDisplay.AddHit(amount);
-				this.currentStats.health -= amount;
+				this.playerData.CurrentStats.Health -= amount;
 				UpdateHealthBar();
-				isDead = this.currentStats.health <= 0;
+				isDead = this.playerData.CurrentStats.Health <= 0;
 
 				if (isDead)
 				{
 					StopFight();
 
 					// Start respawn timer
-					Invoke("Respawn", 1f);
+					Invoke("Respawn", 5f);
 				}
 			}
 		}));
@@ -430,7 +423,8 @@ public class Character : MonoBehaviour
 	public void Respawn()
 	{
 		this.gameObject.transform.position = respawnLocation;
-		this.currentStats.health = this.playerData.Progress.GetFullHeath();
+		this.agent.SetDestination(respawnLocation);
+		this.playerData.CurrentStats.Health = this.playerData.Progress.GetFullHeath();
 		UpdateHealthBar();
 		isDead = false;
 		this.gameObject.SetActive(true);
@@ -438,7 +432,7 @@ public class Character : MonoBehaviour
 
 	private void UpdateHealthBar()
 	{
-		this.statDisplay.SetHealth(this.playerData.Progress.GetFullHeath(), this.currentStats.health);
+		this.statDisplay.SetHealth(this.playerData.Progress.GetFullHeath(), this.playerData.CurrentStats.Health);
 	}
 
 	public void Strike()
@@ -475,17 +469,11 @@ public class Character : MonoBehaviour
 				if (err != null)
 				{
 					Debug.LogError(err);
-					if (fail != null)
-					{
-						fail();
-					}
+					fail?.Invoke();
 				}
 				else
 				{
-					if (success != null)
-					{
-						success();
-					}
+					success?.Invoke();
 					playerData.Inventory.Remove(invItem);
 					gameManager.inventory.Reload();
 				}
@@ -517,13 +505,13 @@ public class Character : MonoBehaviour
 				if (err != null)
 				{
 					Debug.LogError(err);
-					if (fail != null) fail();
+					fail?.Invoke();
 				}
 				else
 				{
 					playerData.Inventory.Store(item);
 					playerData.Bank.Remove(item);
-					if (success != null) success();
+					success?.Invoke();
 				}
 			}));
 		}
@@ -537,14 +525,14 @@ public class Character : MonoBehaviour
 				if (err != null)
 				{
 					Debug.LogError(err);
-					if (fail != null) fail();
+					fail?.Invoke();
 				}
 				else
 				{
 					playerData.Inventory.Remove(item);
 					playerData.Bank.Store(item);
 
-					if (success != null) success();
+					success?.Invoke();
 				}
 			}));
 		}
@@ -556,7 +544,7 @@ public class Character : MonoBehaviour
 			if (err != null)
 			{
 				Debug.LogError(err);
-				if (fail != null) fail();
+				fail?.Invoke();
 			}
 			else
 			{
@@ -580,7 +568,7 @@ public class Character : MonoBehaviour
 					}
 					playerData.Inventory.InventoryItems.Clear();
 				}
-				if (success != null) success();
+				success?.Invoke();
 
 			}
 		}));
@@ -594,11 +582,11 @@ public class Character : MonoBehaviour
 			if (err != null)
 			{
 				Debug.LogError(err);
-				if (fail != null) fail();
+				fail?.Invoke();
 			}
 			else
 			{
-				if (success != null) success();
+				success?.Invoke();
 			}
 		}));
 	}
@@ -610,8 +598,8 @@ public class Character : MonoBehaviour
 		if (itemType == ItemTypes.Food)
 		{
 			FoodData data = JsonConvert.DeserializeObject<FoodData>(invItem.item.ItemData);
-			currentStats.AddHealth(data.HealAmount);
-			SetHealth(currentStats.health, () =>
+			playerData.CurrentStats.AddHealth(data.HealAmount);
+			SetHealth(playerData.CurrentStats.Health, () =>
 			{
 				RemoveFromInventory(invItem);
 			});
@@ -619,45 +607,6 @@ public class Character : MonoBehaviour
 		if (invItem.item.id >= 200 && invItem.item.id < 250)
 		{
 			StartFire(invItem);
-		}
-	}
-	public enum EquipmentSpot
-	{
-		Head,
-		Arms,
-		Hands,
-		Chest,
-		Legs,
-		Feet,
-		Weapon,
-		Shield
-	}
-	public class EquippedItems
-	{
-		public Item Head { get; set; }
-		public Item Arms { get; set; }
-		public Item Hands { get; set; }
-		public Item Chest { get; set; }
-		public Item Legs { get; set; }
-		public Item Feet { get; set; }
-		public Item Weapon { get; set; }
-		public Item Shield { get; set; }
-
-		public int GetTotalDefense()
-		{
-			int defense = 0;
-			foreach (Item item in new[] { Head, Arms, Hands, Chest, Legs, Feet })
-			{
-				if (item != null)
-				{
-					var armorData = JsonConvert.DeserializeObject<ArmorData>(item.ItemData);
-					if (armorData != null)
-					{
-						defense += armorData.GetDefense();
-					}
-				}
-			}
-			return defense;
 		}
 	}
 }

@@ -1,7 +1,9 @@
 ﻿using Miner.Models;
 using Newtonsoft.Json;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Miner.Helpers
 {
@@ -21,31 +23,27 @@ namespace Miner.Helpers
 	}
 	public static class RecipeDatabase
 	{
-		private static Dictionary<int, Recipe> dict;
-		private static bool initialized;
+		private static Dictionary<int, Recipe> dict = new Dictionary<int, Recipe>();
+		public static bool initialized;
+		private static bool initializing;
 		public static Recipe GetRecipe(int recipeId)
 		{
-			if (!initialized)
+			if (!initialized && !initializing)
 			{
-				Initialize();
+				return null;
 			}
 			return dict[recipeId];
 		}
 
-		private static void Initialize()
+		public static IEnumerator Initialize()
 		{
-			using (StreamReader r = new StreamReader(@"D:\Projects\Miner\recipes.json"))
+			initializing = true;
+			return Communication.DataApi.GetRecipes((items, err) =>
 			{
-				string json = r.ReadToEnd();
-				dict = new Dictionary<int, Recipe>();
-				var l = JsonConvert.DeserializeObject<List<Recipe>>(json);
-				foreach (var f in l)
-				{
-					dict.Add(f.Id, f);
-				}
+				dict = items;
+				initializing = false;
 				initialized = true;
-			}
-			initialized = true;
+			});
 		}
 	}
 }

@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using Miner.Helpers;
 using System;
 using System.Collections.Generic;
@@ -248,6 +249,8 @@ namespace Miner.Models
 		public Bank Bank { get; set; } = new Bank();
 		public Progress Progress { get; set; } = new Progress();
 		public PlayerLocation LastLocation { get; set; }
+		public CurrentStats CurrentStats { get; set; }
+		public EquippedItems EquippedItems { get; set; }
 		public Player(string id, string name)
 		{
 			this.Id = id;

@@ -1,5 +1,6 @@
 ﻿using Miner.Models;
 using Newtonsoft.Json;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
@@ -19,31 +20,27 @@ namespace Miner.Helpers
 	}
 	public static class ResourceActionDatabase
 	{
-		private static Dictionary<int, ResourceResult> dict;
-		private static bool initialized;
+		private static Dictionary<int, ResourceResult> dict = new Dictionary<int, ResourceResult>();
+		public static bool initialized;
+		private static bool initializing;
 		public static ResourceResult GetResourceResult(int actionId)
 		{
-			if (!initialized)
+			if (!initialized && !initializing)
 			{
 				Initialize();
 			}
 			return dict[actionId];
 		}
 
-		private static void Initialize()
+		public static IEnumerator Initialize()
 		{
-			using (StreamReader r = new StreamReader(@"D:\Projects\Miner\resourceActions.json"))
+			initializing = true;
+			return Communication.DataApi.GetResourceActions((items, err) =>
 			{
-				string json = r.ReadToEnd();
-				dict = new Dictionary<int, ResourceResult>();
-				var l = JsonConvert.DeserializeObject<List<ResourceResult>>(json);
-				foreach (var f in l)
-				{
-					dict.Add(f.ActionId, f);
-				}
+				dict = items;
+				initializing = false;
 				initialized = true;
-			}
-			initialized = true;
+			});
 		}
 	}
 }

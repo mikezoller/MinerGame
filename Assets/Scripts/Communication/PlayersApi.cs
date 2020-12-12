@@ -16,17 +16,17 @@ namespace Miner.Communication
 			string userName,
 			Action<Player, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 
 			try
 			{
-				return Get(path(GET_PLAYER_PATH + "/byName" + "?name=" + userName),
+				return Get(Path(GET_PLAYER_PATH + "/byName" + "?name=" + userName),
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(null, requestError(request));
+							done(null, RequestError(request));
 						else
-							done(requestResponse<Player>(request), null);
+							done(RequestResponse<Player>(request), null);
 					});
 			}
 			catch (Exception ex)
@@ -42,17 +42,17 @@ namespace Miner.Communication
 			string playerName, Vector3 location,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 			try
 			{
-				return Post(path(GET_PLAYER_PATH + "/UpdatePlayerLocation"), new
+				return Post(Path(GET_PLAYER_PATH + "/UpdatePlayerLocation"), new
 				{ playerName, X = location.x, Y = location.y, Z =location.z },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)
@@ -67,17 +67,17 @@ namespace Miner.Communication
 			string playerName, int actionId,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 			try
 			{
-				return Post(path(GET_PLAYER_PATH + "/DoResourceAction"), new
+				return Post(Path(GET_PLAYER_PATH + "/DoResourceAction"), new
 				{ playerName, actionId },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)
@@ -92,17 +92,17 @@ namespace Miner.Communication
 			string playerName, int actionId, int amount,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 			try
 			{
-				return Post(path(GET_PLAYER_PATH + "/DoCombatAction"), new
+				return Post(Path(GET_PLAYER_PATH + "/DoCombatAction"), new
 				{ playerName, actionId, amount },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)
@@ -117,17 +117,17 @@ namespace Miner.Communication
 			string playerName, int recipeId,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 			try
 			{
-				return Post(path(GET_PLAYER_PATH + "/DoRecipe"), new
+				return Post(Path(GET_PLAYER_PATH + "/DoRecipe"), new
 				{ playerName, recipeId },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)
@@ -142,19 +142,19 @@ namespace Miner.Communication
 			string playerName, int itemId, int quantity,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 
 			try
 			{
 				//return Post(path(GET_PLAYER_PATH + "/addToInventory" + "?playerId=" + userId + "&itemId=" + itemId +"&quantity=" +quantity), null,
-				return Post(path(GET_PLAYER_PATH + "/RemoveFromInventory"), new
+				return Post(Path(GET_PLAYER_PATH + "/RemoveFromInventory"), new
 				{ playerName, itemId, quantity },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)
@@ -170,20 +170,20 @@ namespace Miner.Communication
 			string playerName, int itemId, int quantity,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 
 			try
 			{
 
 				//return Post(path(GET_PLAYER_PATH + "/addToInventory" + "?playerId=" + userId + "&itemId=" + itemId +"&quantity=" +quantity), null,
-				return Post(path(GET_PLAYER_PATH + "/MoveToBank"), new
+				return Post(Path(GET_PLAYER_PATH + "/MoveToBank"), new
 				{ playerName, itemId, quantity },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)
@@ -199,19 +199,19 @@ namespace Miner.Communication
 			string playerName,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 
 			try
 			{
 
-				return Post(path(GET_PLAYER_PATH + "/MoveAllToBank"), new
+				return Post(Path(GET_PLAYER_PATH + "/MoveAllToBank"), new
 				{ playerName },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)
@@ -227,18 +227,18 @@ namespace Miner.Communication
 			string playerName, int itemId, int quantity,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 
 			try
 			{
-				return Post(path(GET_PLAYER_PATH + "/MoveToInventory"), new
+				return Post(Path(GET_PLAYER_PATH + "/MoveToInventory"), new
 				{ playerName, itemId, quantity },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)
@@ -253,18 +253,18 @@ namespace Miner.Communication
 			string playerName, int itemId, int quantity,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 
 			try
 			{
-				return Post(path(GET_PLAYER_PATH + "/AddToInventory"), new
+				return Post(Path(GET_PLAYER_PATH + "/AddToInventory"), new
 				{ playerName, itemId, quantity },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)
@@ -279,17 +279,17 @@ namespace Miner.Communication
 			string playerName, int amount,
 			Action<bool, string> doneCallback = null)
 		{
-			var done = wrapCallback(doneCallback);
+			var done = WrapCallback(doneCallback);
 			try
 			{
-				return Post(path(GET_PLAYER_PATH + "/SetHealth"), new
+				return Post(Path(GET_PLAYER_PATH + "/SetHealth"), new
 				{ playerName, amount },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
-							done(false, requestError(request));
+							done(false, RequestError(request));
 						else
-							done(requestResponse<bool>(request), null);
+							done(true, null);
 					});
 			}
 			catch (Exception ex)

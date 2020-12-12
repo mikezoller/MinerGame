@@ -15,13 +15,11 @@ namespace Assets.Scripts
 		public bool isDead;
 		public float respawnRate = 10f; // seconds
 		public int enemyId;
-		private Canvas canvas;
-		private GameObject hud;
 		private GameObject go;
 		public EnemyData enemyData;
 		private Vector3 respawnLocation;
 		private Bounds bounds;
-		public Vector3 destination { get { return agent.destination; } }
+		public Vector3 Destination { get { return agent.destination; } }
 
 		public Character opponent;
 		private StatDisplay statDisplay;
@@ -31,9 +29,9 @@ namespace Assets.Scripts
 			base.Start();
 			go = this.gameObject;
 			enemyData = EnemyDatabase.GetEnemy(enemyId);
+			enemyData.BaseHP = 5;
+			enemyData.CurrentHP = 5;
 			respawnLocation = this.transform.position;
-			this.hud = GameObject.Find("HUD");
-			this.canvas = this.hud.GetComponent<Canvas>();
 
 			if (statDisplay == null)
 			{
@@ -56,6 +54,10 @@ namespace Assets.Scripts
 					agent.isStopped = true;
 				}
 			}
+			else
+			{
+				agent.isStopped = false;
+			}
 
 		}
 		public bool InitiateCombat(Character opponent)
@@ -68,7 +70,7 @@ namespace Assets.Scripts
 				if (distance >= 5f)
 				{
 					agent.ResetPath();
-					agent.SetDestination(opponent.destination);
+					agent.SetDestination(opponent.Destination);
 				}
 				isInCombat = true;
 				this.opponent = opponent;
@@ -110,7 +112,7 @@ namespace Assets.Scripts
 					var o = (GameObject)Instantiate(Resources.Load(ItemDatabase.GetModelPath(drop.Item.item.id)), this.transform.position, Quaternion.identity);
 
 					// TODO: handle probability
-					Droppable sc = o.AddComponent(typeof(Droppable)) as Droppable;
+					DroppableComponent sc = o.AddComponent(typeof(DroppableComponent)) as DroppableComponent;
 					o.AddComponent<BoxCollider>();
 					sc.Item = drop.Item;
 				}
@@ -148,13 +150,13 @@ namespace Assets.Scripts
 			{
 				// Character tried to flee
 				bool isInRange = IsInRange(this.opponent.gameObject);
-				if (!this.opponent.isInCombat && !isInCombat && isInRange)
-				{
-					InitiateCombat(this.opponent);
-				}
-				else if (this.opponent.isDead || !isInRange)
+				if (this.opponent.isDead || !isInRange)
 				{
 					StopFight();
+				}
+				else if (!this.opponent.isInCombat && !isInCombat && isInRange)
+				{
+					InitiateCombat(this.opponent);
 				}
 				else
 				{
@@ -166,6 +168,10 @@ namespace Assets.Scripts
 					int amount = GetHitAmount();
 					this.DoDamage(amount);
 				}
+			}
+			else
+			{
+				StopFight();
 			}
 		}
 
@@ -210,6 +216,8 @@ namespace Assets.Scripts
 		public void StopFight()
 		{
 			this.isInCombat = false;
+			this.opponent = null;
+			this.statDisplay.ShowHealthBar(false);
 			CancelInvoke("Strike");
 		}
 

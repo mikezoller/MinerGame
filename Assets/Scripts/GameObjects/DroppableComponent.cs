@@ -9,9 +9,14 @@ using UnityEngine.EventSystems;
 
 namespace Assets.Scripts.GameObjects
 {
-	public class Droppable
+	public class DroppableComponent : MonoBehaviour, IPointerClickHandler
 	{
 		public InventoryItem Item { get; set; }
-		public int Probability { get; set; }
+		public bool Claimed { get; set; }
+
+		public void OnPointerClick(PointerEventData eventData)
+		{
+			
+		}
 	}
 }
