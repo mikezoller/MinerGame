@@ -52,11 +52,13 @@ public class NPC : MonoBehaviour
 
 	public virtual void  FixedUpdate()
 	{
-		bool shouldMove = agent.remainingDistance > agent.radius;
+		var distance = Vector3.Distance(transform.position, agent.destination);
+		bool shouldMove = distance > agent.stoppingDistance;
 
 		// Update animation parameters
 		if (shouldMove)
 		{
+			agent.isStopped = false;
 			animator.SetBool("walking", true);
 			
 		} else if (animator.GetBool("walking"))

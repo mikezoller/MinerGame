@@ -29,8 +29,6 @@ namespace Assets.Scripts
 			base.Start();
 			go = this.gameObject;
 			enemyData = EnemyDatabase.GetEnemy(enemyId);
-			enemyData.BaseHP = 5;
-			enemyData.CurrentHP = 5;
 			respawnLocation = this.transform.position;
 
 			if (statDisplay == null)

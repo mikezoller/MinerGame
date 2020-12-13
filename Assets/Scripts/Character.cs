@@ -79,7 +79,10 @@ public class Character : MonoBehaviour
 			}
 			StartAnimation("Idle");
 		}
-		CancelInvoke("Strike");
+		if (isInCombat)
+		{
+			StopFight();
+		}
 	}
 
 	public void HandleRayCastHit(RaycastHit hit, Action callback = null)
@@ -165,7 +168,6 @@ public class Character : MonoBehaviour
 		{
 			StopCoroutine(currentAction);
 			currentAction = null;
-
 		}
 		if (!string.IsNullOrEmpty(activeAnimation))
 		{
@@ -346,13 +348,19 @@ public class Character : MonoBehaviour
 	{
 		this.isInCombat = false;
 		this.opponent = null;
-		statDisplay.ShowHealthBar(false);
+		Invoke("HideHealthBar", 3f);
 		CancelInvoke("Strike");
+	}
+
+	public void HideHealthBar()
+	{
+		statDisplay.ShowHealthBar(false);
+
 	}
 
 	public void ReceiveDamage(Enemy enemy, int amount)
 	{
-		if (CanFight(enemy))
+		if (enemy != null && CanFight(enemy) && this.opponent != enemy)
 		{
 			DoAction(opponent.transform.position, null, StartFight(enemy), interactionRadius);
 		}
@@ -428,12 +436,25 @@ public class Character : MonoBehaviour
 
 	public void Respawn()
 	{
-		this.gameObject.transform.position = respawnLocation;
-		this.agent.SetDestination(respawnLocation);
-		this.playerData.CurrentStats.Health = this.playerData.Progress.GetFullHeath();
-		UpdateHealthBar();
-		isDead = false;
-		this.gameObject.SetActive(true);
+		int fullHealth = this.playerData.Progress.GetFullHeath();
+		StartCoroutine(PlayersApi.SetHealth("mwnzoller", fullHealth, (user, err) =>
+		{
+			if (err != null)
+			{
+				Debug.LogError(err);
+			}
+			else
+			{
+				this.playerData.CurrentStats.Health = fullHealth;
+
+				this.gameObject.transform.position = respawnLocation;
+				this.agent.SetDestination(respawnLocation);
+
+				UpdateHealthBar();
+				isDead = false;
+				this.gameObject.SetActive(true);
+			}
+		}));
 	}
 
 	private void UpdateHealthBar()
