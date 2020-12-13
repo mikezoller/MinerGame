@@ -39,19 +39,19 @@ namespace Assets.Scripts.GameObjects.Resources
 		public override void OnRefilled()
 		{
 			base.OnRefilled();
+			this.GetComponent<MeshRenderer>().enabled = true;
 			foreach (Transform child in transform)
 			{
-				if (child.tag == "MaterialTarget")
-					child.gameObject.SetActive(true);
+				child.gameObject.SetActive(false);
 			}
 		}
 		public override void OnDepleted()
 		{
 			base.OnDepleted();
+			this.GetComponent<MeshRenderer>().enabled = false;
 			foreach (Transform child in transform)
 			{
-				if (child.tag == "MaterialTarget")
-					child.gameObject.SetActive(false);
+				child.gameObject.SetActive(true);
 			}
 		}
 		public WoodcuttingResource(TreeType type)

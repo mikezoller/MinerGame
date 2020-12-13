@@ -625,10 +625,11 @@ public class Character : MonoBehaviour
 		if (itemType == ItemTypes.Food)
 		{
 			FoodData data = JsonConvert.DeserializeObject<FoodData>(invItem.item.ItemData);
-			playerData.CurrentStats.AddHealth(data.HealAmount);
 			SetHealth(playerData.CurrentStats.Health, () =>
 			{
 				RemoveFromInventory(invItem);
+				playerData.CurrentStats.AddHealth(data.HealAmount);
+				UpdateHealthBar();
 			});
 		}
 		if (invItem.item.id >= 200 && invItem.item.id < 250)

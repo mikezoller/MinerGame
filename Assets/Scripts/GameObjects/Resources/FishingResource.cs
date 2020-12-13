@@ -43,6 +43,18 @@ namespace Assets.Scripts.GameObjects.Resources
 
 		}
 
+		public override void OnDepleted()
+		{
+			base.OnDepleted();
+			this.GetComponent<MeshRenderer>().enabled = false;
+		}
+
+		public override void OnRefilled()
+		{
+			base.OnRefilled();
+			this.GetComponent<MeshRenderer>().enabled = true;
+		}
+
 		public void Start()
 		{
 			SetType(Type);
