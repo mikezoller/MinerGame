@@ -37,8 +37,7 @@ namespace Assets.Scripts.GameObjects.Resources
 			base.OnRefilled();
 			foreach (Transform child in transform)
 			{
-				if (child.tag == "MaterialTarget")
-					child.gameObject.SetActive(true);
+				child.gameObject.SetActive(true);
 			}
 		}
 		public override void OnDepleted()
@@ -46,8 +45,7 @@ namespace Assets.Scripts.GameObjects.Resources
 			base.OnDepleted();
 			foreach (Transform child in transform)
 			{
-				if (child.tag == "MaterialTarget")
-					child.gameObject.SetActive(false);
+				child.gameObject.SetActive(false);
 			}
 		}
 		public void SetType(RockType type)

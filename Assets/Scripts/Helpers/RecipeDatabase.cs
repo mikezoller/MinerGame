@@ -11,6 +11,7 @@ namespace Miner.Helpers
 	public class Recipe
 	{
 		public int Id { get; set; }
+		public string Name{ get; set; }
 		public List<BasicInventoryItem> Input { get; set; }
 		public List<BasicInventoryItem> Output { get; set; }
 		public SkillType Skill { get; set; }
@@ -20,7 +21,7 @@ namespace Miner.Helpers
 	public class BasicInventoryItem
 	{
 		public int ItemId { get; set; }
-		public int Quantitiy { get; set; }
+		public int Quantity { get; set; }
 	}
 	public static class RecipeDatabase
 	{

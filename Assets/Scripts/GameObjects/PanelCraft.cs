@@ -26,7 +26,7 @@ namespace Miner.GameObjects
 				invItems.Add(new InventoryItem()
 				{
 					item = ItemDatabase.GetItem(outItem.ItemId),
-					quantity = outItem.Quantitiy,
+					quantity = outItem.Quantity,
 				});
 			}
 			itemGrid.items = invItems;
@@ -82,7 +82,7 @@ namespace Miner.GameObjects
 								playerData.Inventory.Remove(new InventoryItem()
 								{
 									item = ItemDatabase.GetItem(req.ItemId),
-									quantity = req.Quantitiy,
+									quantity = req.Quantity,
 								});
 							}
 							foreach (var res in recipe.Output)
@@ -90,7 +90,7 @@ namespace Miner.GameObjects
 								playerData.Inventory.Store(new InventoryItem()
 								{
 									item = ItemDatabase.GetItem(res.ItemId),
-									quantity = res.Quantitiy,
+									quantity = res.Quantity,
 								});
 							}
 							gameManager.ReloadInventory();
@@ -105,7 +105,7 @@ namespace Miner.GameObjects
 			bool canMake = true;
 			foreach (var req in recipe.Input)
 			{
-				if (!playerData.Inventory.HasAtLeast(req.ItemId, req.Quantitiy))
+				if (!playerData.Inventory.HasAtLeast(req.ItemId, req.Quantity))
 				{
 					canMake = false;
 					break;

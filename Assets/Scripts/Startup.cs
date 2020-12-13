@@ -13,9 +13,11 @@ public class Startup : MonoBehaviour
 	public GameManager gameManager;
 	public LoadingPanel panelLoading;
 	public Character character;
+
 	// Start is called before the first frame update
 	void Start()
 	{
+		this.gameManager.gameObject.SetActive(false);
 		StartCoroutine(InitializeData());
 	}
 	private float GetProgress()
