@@ -1,5 +1,6 @@
 ﻿using Miner.Models;
 using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -32,14 +33,21 @@ namespace Miner.Helpers
 			return dict[actionId];
 		}
 
-		public static IEnumerator Initialize()
+		public static IEnumerator Initialize(Action fail = null)
 		{
 			initializing = true;
 			return Communication.DataApi.GetResourceActions((items, err) =>
 			{
-				dict = items;
-				initializing = false;
-				initialized = true;
+				if (err == null)
+				{
+					dict = items;
+					initializing = false;
+					initialized = true;
+				}
+				else
+				{
+					fail?.Invoke();
+				}
 			});
 		}
 	}

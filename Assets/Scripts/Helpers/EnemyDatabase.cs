@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Models;
 using Miner.Models;
 using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -28,14 +29,21 @@ namespace Miner.Helpers
 			return $"~/Assets/Models/Enemies/{enemyId}.fbx";
 		}
 
-		public static IEnumerator Initialize()
+		public static IEnumerator Initialize(Action fail = null)
 		{
 			initializing = true;
 			return Communication.DataApi.GetEnemies((items, err) =>
 			{
-				dict = items;
-				initializing = false;
-				initialized = true;
+				if (err == null)
+				{
+					dict = items;
+					initializing = false;
+					initialized = true;
+				}
+				else
+				{
+					fail?.Invoke();
+				}
 			});
 		}
 	}

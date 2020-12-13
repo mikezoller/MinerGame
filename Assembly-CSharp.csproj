@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\GameObjects\DroppableComponent.cs" />
     <Compile Include="Assets\Scripts\GameObjects\Inventory.cs" />
+    <Compile Include="Assets\Scripts\LoadingPanel.cs" />
     <Compile Include="Assets\Scripts\LookAt.cs" />
     <Compile Include="Assets\Scripts\GameObjects\ResourceObject.cs" />
     <Compile Include="Assets\Scripts\Communication\PlayersApi.cs" />

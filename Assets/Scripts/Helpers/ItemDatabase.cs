@@ -1,5 +1,6 @@
 ﻿using Miner.Models;
 using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +14,7 @@ namespace Miner.Helpers
         {
             get
             {
-				if (!initialized && !initializing)
+				if (!initialized)
 				{
 					BuildItemDatabase();
 				}
@@ -22,11 +23,10 @@ namespace Miner.Helpers
         }
         private static List<Item> items = new List<Item>();
         public static bool initialized;
-        private static bool initializing;
 
         public static Item GetItem(int id)
         {
-			if (!initialized && !initializing)
+			if (!initialized)
 			{
 				BuildItemDatabase();
 			}
@@ -38,14 +38,19 @@ namespace Miner.Helpers
 			return $"items/" + id;
 		}
 
-		public static IEnumerator BuildItemDatabase()
+		public static IEnumerator BuildItemDatabase(Action fail = null)
 		{
-			initializing = true;
 			return Communication.DataApi.GetItems((items, err) =>
 			{
-				ItemDatabase.items = items;
-				initializing = false;
-				initialized = true;
+				if (err == null)
+				{
+					ItemDatabase.items = items;
+					initialized = true;
+				}
+				else
+				{
+					fail?.Invoke();
+				}
 			});
 		}
 	}
