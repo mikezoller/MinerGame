@@ -99,8 +99,7 @@ namespace Assets.Scripts.GameObjects.Resources
 			GameObject go = null;
 			foreach (Transform child in transform)
 			{
-				if (child.tag == "MaterialTarget")
-					go = child.gameObject;
+				go = child.gameObject;
 			}
 			if (go != null)
 			{
@@ -114,10 +113,10 @@ namespace Assets.Scripts.GameObjects.Resources
 
 		public MiningResource() : this(RockType.None)
 		{
-
 		}
 		public MiningResource(RockType type)
 		{
+			resourceType = ResourceType.Mining;
 			this.StartTrigger = "mining";
 			this.StopTrigger = "Idle";
 		}

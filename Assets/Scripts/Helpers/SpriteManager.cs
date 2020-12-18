@@ -16,7 +16,7 @@ namespace Miner.Helpers
 				{
 					_itemSprites = new Dictionary<int, Sprite>();
 
-					for (int i = 0; i < 41; i++)
+					for (int i = 0; i < 61; i++)
 					{
 						var x = Resources.LoadAll<Sprite>("spritesheets/items" + i);
 						int count = 0;

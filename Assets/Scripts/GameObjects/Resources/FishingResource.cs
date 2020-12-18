@@ -86,6 +86,7 @@ namespace Assets.Scripts.GameObjects.Resources
 		}
 		public FishingResource(FishType type)
 		{
+			resourceType = ResourceType.Fishing;
 			SetType(type);
 			this.StartTrigger = "fishing";
 			this.StopTrigger = "Idle";

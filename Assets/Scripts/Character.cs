@@ -17,7 +17,6 @@ public class Character : MonoBehaviour
 	// The target (cylinder) position.
 	private Animator animator;
 
-
 	public bool isInCombat;
 	public float strikeRate = 2f;
 	public bool isDead;
@@ -34,22 +33,18 @@ public class Character : MonoBehaviour
 
 	public Player playerData;
 
-	GameManager gameManager;
+	public GameManager gameManager;
 
 	public Coroutine currentAction;
 
+	// Equipment
+	public GameObject weaponBone;
 
 	// Start is called before the first frame update
 	void Start()
 	{
 		animator = this.GetComponent<Animator>();
 		agent = GetComponent<NavMeshAgent>();
-		// Don’t update position automatically
-		//agent.updatePosition = false;
-
-		var gc = GameObject.FindGameObjectWithTag("GameController");
-		gameManager = gc.GetComponent<GameManager>();
-		SetClothing();
 
 		if (statDisplay == null)
 		{
@@ -242,45 +237,6 @@ public class Character : MonoBehaviour
 	}
 
 	#region Clothing
-	public enum ClothingType
-	{
-		Body,
-		Clothing1,
-		Armor1,
-		All
-	}
-
-	private readonly Dictionary<BodyPart, string> bodyPartDict = new Dictionary<BodyPart, string>
-	{
-		{ BodyPart.Head, "Head" },
-		{ BodyPart.Arms, "Arms" },
-		{ BodyPart.Hands, "Hands" },
-		{ BodyPart.Chest, "Chest" },
-		{ BodyPart.Legs, "Legs" },
-		{ BodyPart.Feet, "Feet" },
-	};
-
-
-	public void RemoveAllClothing()
-	{
-		foreach (var t in bodyPartDict.Keys)
-		{
-			RemoveBodyPartClothing(t);
-		}
-	}
-
-	public void RemoveBodyPartClothing(BodyPart bodyPart)
-	{
-		SetBodyPartClothing(bodyPart, ClothingType.All, false);
-		SetBodyPartClothing(bodyPart, ClothingType.Body, true);
-	}
-	public void SetClothing()
-	{
-		RemoveAllClothing();
-		SetBodyPartClothing(BodyPart.Legs, ClothingType.Armor1, true);
-		SetSkinColor(Color.red);
-	}
-
 	public void SetSkinColor(Color color)
 	{
 		var body = this.transform.Find("Body");
@@ -293,30 +249,6 @@ public class Character : MonoBehaviour
 			var bp = bodyPartRoot.Find(bpString);
 			var renderer = bp.GetComponent<SkinnedMeshRenderer>();
 			renderer.material.color = color;
-		}
-	}
-	private void SetBodyPartClothing(BodyPart bodyPart, ClothingType clothingType, bool active)
-	{
-		var body = this.transform.Find("Body");
-
-		var bp = body.Find(bodyPart.ToString());
-		if (clothingType == ClothingType.All)
-		{
-			for (var i = 0; i < bp.childCount; i++)
-			{
-				var child = bp.GetChild(i);
-				child.gameObject.SetActive(active);
-			}
-		}
-		else
-		{
-			// Hide the rest of this body part clothing
-			if (active)
-			{
-				SetBodyPartClothing(bodyPart, ClothingType.All, false);
-			}
-			var item = bp.Find(bodyPart.ToString() + clothingType.ToString());
-			item.gameObject.SetActive(active);
 		}
 	}
 	#endregion Clothing
@@ -620,21 +552,183 @@ public class Character : MonoBehaviour
 
 	public void InventoryItemClicked(InventoryItem invItem)
 	{
-		ItemTypes itemType = invItem.item.ItemType;
+		var baseItem = ItemDatabase.GetItem(invItem.item.id);
 
-		if (itemType == ItemTypes.Food)
+		// Don't do anything if we are working with the bank
+		if (!gameManager.panelBank.gameObject.activeSelf)
 		{
-			FoodData data = JsonConvert.DeserializeObject<FoodData>(invItem.item.ItemData);
-			SetHealth(playerData.CurrentStats.Health, () =>
+			ItemTypes itemType = baseItem.ItemType;
+			if (itemType == ItemTypes.Food)
 			{
-				RemoveFromInventory(invItem);
-				playerData.CurrentStats.AddHealth(data.HealAmount);
-				UpdateHealthBar();
-			});
+				FoodData data = JsonConvert.DeserializeObject<FoodData>(invItem.item.ItemData);
+				SetHealth(playerData.CurrentStats.Health, () =>
+				{
+					RemoveFromInventory(invItem);
+					playerData.CurrentStats.AddHealth(data.HealAmount);
+					UpdateHealthBar();
+				});
+			}
+			if (invItem.item.id >= 200 && invItem.item.id < 250)
+			{
+				StartFire(invItem);
+			}
+			if (itemType == ItemTypes.Armor)
+			{
+				ArmorData armorData = JsonConvert.DeserializeObject<ArmorData>(baseItem.ItemData);
+				EquipmentSpot spot = armorData.EquipmentSpot;
+				// Equip armor
+				SetEquipment(spot, baseItem);
+			}
+			if (itemType == ItemTypes.Weapon)
+			{
+				SetEquipment(EquipmentSpot.Weapon, baseItem);
+			}
 		}
-		if (invItem.item.id >= 200 && invItem.item.id < 250)
+	}
+
+	// MAIN Equipment method. Calls both game obejct and server methods if necessary
+	public void SetEquipment(EquipmentSpot spot, Item item)
+	{
+		EquipItemServer(null, EquipmentSpot.Weapon, () =>
 		{
-			StartFire(invItem);
+			RemoveEquipmentGameObject(EquipmentSpot.Weapon);
+
+			if (item != null && item.ItemType == ItemTypes.Weapon)
+			{
+				EquipItemServer(item, EquipmentSpot.Weapon, () =>
+				{
+					SetEquipmentItemGameObject(item);
+				});
+			}
+		});
+	}
+
+	public void RemoveEquipmentGameObject(EquipmentSpot spot)
+	{
+		switch (spot)
+		{
+			case EquipmentSpot.Weapon:
+				if (weaponBone.transform.childCount > 2)
+				{
+					var existing = weaponBone.transform.GetChild(2);
+					Destroy(existing.gameObject);
+				}
+				break;
 		}
+	}
+	public void SetEquipmentItemsGameObjects(EquippedItems eq)
+	{
+		foreach (EquipmentSpot spot in Enum.GetValues(typeof(EquipmentSpot)))
+		{
+			if (eq[spot] != null)
+			{
+				SetEquipmentItemGameObject(eq[spot]);
+			}
+		}
+	}
+	public void SetEquipmentItemGameObject(Item item)
+	{
+		EquipmentSpot spot = EquipmentSpot.Feet;
+		if (item.ItemType == ItemTypes.Weapon)
+		{
+			var weaponData = JsonConvert.DeserializeObject<WeaponData>(item.ItemData);
+			var o = (GameObject)Instantiate(Resources.Load("Prefabs\\" + weaponData.ModelName), this.transform.position, Quaternion.identity);
+
+			o.transform.parent = weaponBone.transform;
+			o.transform.localRotation = Quaternion.identity;
+			o.transform.Rotate(0, -120, 180);
+			o.transform.localPosition = new Vector3(0, 0, 0);
+			string path = "Materials\\" + weaponData.HandleMaterialType.ToString();
+			o.GetComponent<MeshRenderer>().material = UnityEngine.Resources.Load<Material>(path);
+			var metal = o.transform.GetChild(0);
+			path = "Materials\\" + weaponData.MaterialType.ToString();
+			metal.GetComponent<MeshRenderer>().material = UnityEngine.Resources.Load<Material>(path);
+			spot = EquipmentSpot.Weapon;
+		}
+
+		if (item.ItemType == ItemTypes.Armor)
+		{
+			var armorData = JsonConvert.DeserializeObject<ArmorData>(item.ItemData);
+			var o = (GameObject)Instantiate(Resources.Load("Prefabs\\" + armorData.ModelName), this.transform.position, Quaternion.identity);
+
+			o.transform.parent = weaponBone.transform;
+			o.transform.localRotation = Quaternion.identity;
+			o.transform.Rotate(0, -120, 180);
+			o.transform.localPosition = new Vector3(0, 0, 0);
+			o.GetComponent<MeshRenderer>().material.SetColor("_Color", armorData.OrnamentColor);
+			var metal = o.transform.GetChild(0);
+			metal.GetComponent<MeshRenderer>().material = UnityEngine.Resources.Load<Material>("Materials\\" + armorData.MaterialType.ToString());
+			spot = armorData.EquipmentSpot;
+		}
+		gameManager.panelEquipment.SetEquippedItem(spot, item);
+		equippedItems.SetItem(spot, item);
+	}
+
+	public void EquipItemServer(Item item, EquipmentSpot spot, Action done = null)
+	{
+		switch (spot)
+		{
+			case EquipmentSpot.Weapon:
+				var existing = equippedItems.Weapon;
+				if (item != null)
+				{
+					if (existing == null || playerData.Inventory.CanAdd(item))
+					{
+						StartCoroutine(PlayersApi.SetEquippedItem("mwnzoller", spot, item, (success, err) =>
+						{
+							if (existing != null)
+							{
+								playerData.Inventory.Store(existing, 1);
+							}
+							equippedItems.Weapon = item;
+							playerData.Inventory.Remove(item);
+							gameManager.ReloadInventory();
+
+							done?.Invoke();
+						}));
+					}
+				}
+				else
+				{
+					StartCoroutine(PlayersApi.SetEquippedItem("mwnzoller", spot, null, (success, err) =>
+					{
+						equippedItems.Weapon = null;
+						if (existing != null)
+						{
+							playerData.Inventory.Store(existing, 1);
+						}
+						gameManager.ReloadInventory();
+						done?.Invoke();
+
+					}));
+
+				}
+				break;
+		}
+	}
+
+	public Item GetBestTool(out WeaponData weaponData, Predicate<WeaponData> pred)
+	{
+		var weapons = playerData.Inventory.InventoryItems.Where(x => x.item.ItemType == ItemTypes.Weapon);
+		weaponData = null;
+		Item item = null;
+		foreach (var weapon in weapons)
+		{
+			var wd = JsonConvert.DeserializeObject<WeaponData>(weapon.item.ItemData);
+			if (pred(wd))
+			{
+				if (item == null)
+				{
+					item = weapon.item;
+					weaponData = wd;
+				}
+				else if (wd.ProbabilityBuff > weaponData.ProbabilityBuff)
+				{
+					item = weapon.item;
+					weaponData = wd;
+				}
+			}
+		}
+		return item;
 	}
 }

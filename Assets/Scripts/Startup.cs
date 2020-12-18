@@ -79,8 +79,12 @@ public class Startup : MonoBehaviour
 			}
 			else
 			{
+				character.gameManager = gameManager;
 				character.playerData = user;
 				character.playerData.CurrentStats.playerProgress = character.playerData.Progress;
+
+				character.SetEquipmentItemsGameObjects(character.playerData.EquippedItems);
+
 				character.initialPosition = new Vector3((float)user.LastLocation.X, (float)user.LastLocation.Y, (float)user.LastLocation.Z);
 				gameManager.character = character;
 

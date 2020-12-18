@@ -56,6 +56,7 @@ namespace Assets.Scripts.GameObjects.Resources
 		}
 		public WoodcuttingResource(TreeType type)
 		{
+			resourceType = ResourceType.Chopping;
 			this.StartTrigger = "chopping";
 			this.StopTrigger = "Idle";
 		}

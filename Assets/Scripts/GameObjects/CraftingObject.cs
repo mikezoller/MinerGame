@@ -30,8 +30,7 @@ namespace Assets.Scripts.GameObjects
 		public override void Clicked(PointerEventData eventData)
 		{
 			base.Clicked(eventData);
-			var panel = GameObject.FindWithTag("CraftPanel");
-			var script = panel.GetComponent<PanelCraft>();
+			var script = uiToShow.GetComponent<PanelCraft>();
 			script.Activate(recipes);
 		}
 

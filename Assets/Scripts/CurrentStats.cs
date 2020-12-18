@@ -10,11 +10,10 @@ namespace Assets.Scripts
 		public Progress playerProgress;
 
 		public int Health = 4; // 10 - 100
-		public int Strength = 4; // 10 - 100
-		public int Accuracy = 4; // 10 - 100
-		public int Defense = 4; // 10 - 100
-		public int Attack = 4; // 10 - 100
-		public int AttackSpeed = 4; // 10 - 100
+		public float Strength = 4; // 10 - 100
+		public float Accuracy = 4; // 10 - 100
+		public float Defense = 4; // 10 - 100
+		public float Attack = 4; // 10 - 100
 
 		public void AddHealth(int amount)
 		{
@@ -39,13 +38,11 @@ namespace Assets.Scripts
 			Attack = playerProgress.GetAttack();
 			Strength = playerProgress.GetStrength();
 			Accuracy = playerProgress.GetAccuracy();
-			AttackSpeed = 2;
 			if (weaponData != null)
 			{
-				Attack += weaponData.AttackBoost;
-				Strength +=  weaponData.StrengthBoost;
-				Accuracy +=  weaponData.AccuracyBoost;
-				AttackSpeed = weaponData.Speed;
+				Attack += weaponData.AttackBuff;
+				Strength +=  weaponData.StrengthBuff;
+				Accuracy +=  weaponData.AccuracyBuff;
 			}
 		}
 	}

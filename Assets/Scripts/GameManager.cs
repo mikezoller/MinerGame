@@ -1,10 +1,12 @@
 ﻿using Assets.Scripts.Helpers;
 using Miner.GameObjects;
 using Miner.Models;
+using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.AI;
+using static MessagePanel;
 
 namespace Miner
 {
@@ -15,11 +17,12 @@ namespace Miner
 		public HUD hud;
 		public SkillsPanel skillsPanel;
 		public GameObjects.Inventory inventory;
-		public MessagePanel messagePanel;
+		public MessagePanel panelMessage;
 		public PanelCraft craftPanel;
 		public GameObjects.Bank panelBank;
 		public GameObjects.PanelRequirements panelRequirements;
 		public GameObject panelLoading;
+		public EquipmentPanel panelEquipment;
 
 		public Character character;
 		// Start is called before the first frame update
@@ -38,7 +41,7 @@ namespace Miner
 			skillsPanel.SetPlayerSkills(character.playerData.Progress.Skills);
 			craftPanel.playerData = character.playerData;
 
-			messagePanel.HideMessage();
+			panelMessage.HideMessage();
 			panelBank.gameObject.SetActive(false);
 			panelRequirements.gameObject.SetActive(false);
 			var cpgo = GameObject.FindWithTag("CraftPanel");
@@ -47,6 +50,11 @@ namespace Miner
 
 			ShowHUD(true);
 
+		}
+
+		public void ShowMessage(string message, MessageType type, Action accept = null, Action cancel = null)
+		{
+			panelMessage.ShowMessage(message, type, accept, cancel);
 		}
 
 		public void SetAnimBool(string trigger)

@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using Miner.Models;
 using static Miner.Communication.MultiActionRequest;
+using Assets.Scripts;
 
 namespace Miner.Communication
 {
@@ -123,6 +124,31 @@ namespace Miner.Communication
 			{
 				return Post(Path(GET_PLAYER_PATH + "/DoRecipe"), new
 				{ playerName, recipeId },
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(false, RequestError(request));
+						else
+							done(true, null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(false, ex.Message);
+			}
+			return null;
+		}
+		public static IEnumerator SetEquippedItem(
+			string playerName, EquipmentSpot equipmentSpot, Item item,
+			Action<bool, string> doneCallback = null)
+		{
+			var done = WrapCallback(doneCallback);
+			try
+			{
+				return Post(Path(GET_PLAYER_PATH + "/SetEquippedItem"), new
+				{ playerName, equipmentSpot, item },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)

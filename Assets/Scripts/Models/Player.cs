@@ -49,6 +49,14 @@ namespace Miner.Models
 			return hasAtLeast;
 		}
 
+		public virtual bool CanAdd(Item item, int quantity = 1)
+		{
+			return CanAdd(new InventoryItem()
+			{
+				item = item,
+				quantity = quantity
+			});
+		}
 		public virtual bool CanAdd(InventoryItem invItem)
 		{
 			bool canAdd = true;
@@ -70,6 +78,14 @@ namespace Miner.Models
 			return canAdd;
 		}
 
+		public virtual void Remove(Item item, int quantity = 1)
+		{
+			Remove(new InventoryItem()
+			{
+				item = item,
+				quantity = quantity
+			});
+		}
 		public virtual void Remove(InventoryItem invItem)
 		{
 			if (allowStackingAll || invItem.item.stackable)
@@ -101,6 +117,14 @@ namespace Miner.Models
 			}
 		}
 
+		public virtual bool Store(Item item, int quantity)
+		{
+			return Store(new InventoryItem()
+			{
+				item = item,
+				quantity = quantity
+			});
+		}
 		public virtual bool Store(InventoryItem invItem, int index = -1)
 		{
 			bool success = false;
