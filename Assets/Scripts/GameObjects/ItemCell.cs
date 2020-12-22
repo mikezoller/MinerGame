@@ -18,10 +18,10 @@ namespace Miner.GameObjects
         // Start is called before the first frame update
         void Start()
         {
-			if (item != null && item.item != null)
+			if (item != null && item.Item != null)
 			{
 				var s = button.GetComponent<Image>();
-				s.sprite = SpriteManager.GetItemSprite(item.item.id);
+				s.sprite = SpriteManager.GetItemSprite(item.Item.Id);
 			}
         }
 
@@ -39,7 +39,7 @@ namespace Miner.GameObjects
 		{
 			if (item != null && text != null)
 			{
-				text.text = item.quantity > 1 ? item.quantity.ToString() : "";
+				text.text = item.Quantity > 1 ? item.Quantity.ToString() : "";
 			}
 		}
 
@@ -47,9 +47,9 @@ namespace Miner.GameObjects
 				var s = button.GetComponent<Image>();
 			if (item != null)
 			{
-				s.sprite = SpriteManager.GetItemSprite(item.item.id);
+				s.sprite = SpriteManager.GetItemSprite(item.Item.Id);
 				s.color = Color.white;
-				text.text = item.quantity > 1 ? item.quantity.ToString() : "";
+				text.text = item.Quantity > 1 ? item.Quantity.ToString() : "";
 			}
 			else
 			{

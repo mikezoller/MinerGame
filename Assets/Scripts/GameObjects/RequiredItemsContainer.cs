@@ -31,10 +31,10 @@ namespace Assets.Scripts.GameObjects
 
 			foreach (var item in Requirements)
 			{
-				var invItem = InventoryItems.FirstOrDefault(i => i.item.id == item.ItemId);
+				var invItem = InventoryItems.FirstOrDefault(i => i.Item.Id == item.ItemId);
 				if (invItem != null)
 				{
-					if (invItem.quantity < item.Quantity)
+					if (invItem.Quantity < item.Quantity)
 					{
 						hasAll = false;
 						break;

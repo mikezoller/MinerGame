@@ -14,6 +14,8 @@ namespace Assets.Scripts.GameObjects
 		private Mesh tileMeshRed;
 		private Mesh tileMeshGreen;
 
+		public bool isUI;
+
 		private static Material healthBarRed;
 		private static Material healthBarGreen;
 
@@ -29,6 +31,10 @@ namespace Assets.Scripts.GameObjects
 			go.transform.parent = gameObject.transform;
 			go.transform.localPosition = pos;
 			AddHealthBar();
+			if (isUI)
+			{
+				ShowHealthBar(true);
+			}
 		}
 
 		private void AddHealthBar()
@@ -124,11 +130,14 @@ namespace Assets.Scripts.GameObjects
 
 		private void FixedUpdate()
 		{
-			var transform = Camera.main.transform;
-			var cameraCenter = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane));
-			transform.position += (cameraCenter - gameObject.transform.position);
-			go.transform.LookAt(transform, Vector3.up);
-			go.transform.Rotate(0, 180, 0);
+			if (!isUI)
+			{
+				var transform = Camera.main.transform;
+				var cameraCenter = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane));
+				transform.position += (cameraCenter - gameObject.transform.position);
+				go.transform.LookAt(transform, Vector3.up);
+				go.transform.Rotate(0, 180, 0);
+			}
 		}
 	}
 }

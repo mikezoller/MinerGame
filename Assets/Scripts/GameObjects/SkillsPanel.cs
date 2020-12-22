@@ -56,7 +56,7 @@ namespace Miner.GameObjects
 			if (vallSkill != null)
 			{
 				Text text = vallSkill.GetComponent<Text>();
-				text.text = skill.Experience.ToString() + " : " + skill.Level.ToString();
+				text.text = skill.Level.ToString();
 			}
 		}
 	}

@@ -21,42 +21,42 @@ namespace Miner.Models
 	[Serializable]
 	public class Item
 	{
-		public int id;
-		public string title;
-		public string description;
-		public bool stackable = true;
+		public int Id;
+		public string Title;
+		public string Description;
+		public bool Stackable = true;
 
 		public ItemTypes ItemType { get; set; }
 		public string ItemData { get; set; }
 		public Item() { }
 		public Item(int id, string title, string description, bool stackable)
 		{
-			this.id = id;
-			this.title = title;
-			this.description = description;
-			this.stackable = stackable;
+			this.Id = id;
+			this.Title = title;
+			this.Description = description;
+			this.Stackable = stackable;
 		}
 
 		public Item(Item item)
 		{
-			this.id = item.id;
-			this.title = item.title;
-			this.description = item.description;
+			this.Id = item.Id;
+			this.Title = item.Title;
+			this.Description = item.Description;
 		}
 	}
 
 	[Serializable]
 	public class InventoryItem
 	{
-		public Item item { get; set; }
-		public int quantity { get; set; }
+		public Item Item { get; set; }
+		public int Quantity { get; set; }
 
 		public InventoryItem Copy(int qty)
 		{
 			return new InventoryItem()
 			{
-				item = this.item,
-				quantity = qty
+				Item = this.Item,
+				Quantity = qty
 			};
 		}
 	}

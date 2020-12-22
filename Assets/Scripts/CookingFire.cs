@@ -48,8 +48,8 @@ namespace Assets.Scripts
 
 			result = new InventoryItem()
 			{
-				item = ItemDatabase.GetItem(input.item.id + 1000),
-				quantity = 1
+				Item = ItemDatabase.GetItem(input.Item.Id + 1000),
+				Quantity = 1
 			};
 			// Add cooking skill
 

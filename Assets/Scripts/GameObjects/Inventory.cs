@@ -52,14 +52,14 @@ namespace Miner.GameObjects
         {
             if (Editing)
             {
-                if (cell.item.quantity == 1)
+                if (cell.item.Quantity == 1)
                 {
                     playerInventory.InventoryItems.Remove(cell.item);
                     Destroy(cell);
                 }
                 else
                 {
-                    cell.item.quantity--;
+                    cell.item.Quantity--;
                 }
                 Reload();
             }

@@ -47,7 +47,7 @@ namespace Assets.Scripts.Helpers
 
 		public IEnumerator TransferFromBankToInventory(InventoryItem invItem)
 		{
-			PlayersApi.TransferToInventory("mwnzoller", invItem.item.id, invItem.quantity, (user, err) =>
+			PlayersApi.TransferToInventory("mwnzoller", invItem.Item.Id, invItem.Quantity, (user, err) =>
 			{
 				if (err != null)
 				{

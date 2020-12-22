@@ -30,7 +30,7 @@ namespace Miner.Helpers
 			{
 				BuildItemDatabase();
 			}
-			return items.Find(item => item.id == id);
+			return items.Find(item => item.Id == id);
         }
 
 		public static string GetModelPath(int id)

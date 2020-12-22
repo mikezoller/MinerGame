@@ -63,7 +63,7 @@ namespace Miner.GameObjects
 		public InventoryItem GetItem()
 		{
 			var result = ResourceActionDatabase.GetResourceResult(actionId);
-			return new InventoryItem() { item = ItemDatabase.GetItem(result.ItemId), quantity = result.Quantity };
+			return new InventoryItem() { Item = ItemDatabase.GetItem(result.ItemId), Quantity = result.Quantity };
 		}
 		public IEnumerator DoWork(GameManager gameManager, WeaponData toolData, Action done = null)
 		{

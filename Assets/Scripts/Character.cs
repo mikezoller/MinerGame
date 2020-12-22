@@ -126,7 +126,7 @@ public class Character : MonoBehaviour
 	{
 		if (playerData.Inventory.CanAdd(item))
 		{
-			StartCoroutine(PlayersApi.AddToInventory("mwnzoller", item.item.id, item.quantity, (user, err) =>
+			StartCoroutine(PlayersApi.AddToInventory("mwnzoller", item.Item.Id, item.Quantity, (user, err) =>
 			{
 				if (err != null)
 				{
@@ -421,9 +421,9 @@ public class Character : MonoBehaviour
 
 	private void RemoveFromInventory(InventoryItem invItem, Action success = null, Action fail = null)
 	{
-		if (playerData.Inventory.HasAtLeast(invItem.item.id, invItem.quantity))
+		if (playerData.Inventory.HasAtLeast(invItem.Item.Id, invItem.Quantity))
 		{
-			StartCoroutine(PlayersApi.RemoveFromInventory("mwnzoller", invItem.item.id, invItem.quantity, (user, err) =>
+			StartCoroutine(PlayersApi.RemoveFromInventory("mwnzoller", invItem.Item.Id, invItem.Quantity, (user, err) =>
 			{
 				if (err != null)
 				{
@@ -459,7 +459,7 @@ public class Character : MonoBehaviour
 	{
 		if (playerData.Inventory.CanAdd(item))
 		{
-			StartCoroutine(PlayersApi.TransferToInventory("mwnzoller", item.item.id, item.quantity, (user, err) =>
+			StartCoroutine(PlayersApi.TransferToInventory("mwnzoller", item.Item.Id, item.Quantity, (user, err) =>
 			{
 				if (err != null)
 				{
@@ -479,7 +479,7 @@ public class Character : MonoBehaviour
 	{
 		if (playerData.Bank.CanAdd(item))
 		{
-			StartCoroutine(PlayersApi.TransferToBank("mwnzoller", item.item.id, item.quantity, (user, err) =>
+			StartCoroutine(PlayersApi.TransferToBank("mwnzoller", item.Item.Id, item.Quantity, (user, err) =>
 			{
 				if (err != null)
 				{
@@ -552,7 +552,7 @@ public class Character : MonoBehaviour
 
 	public void InventoryItemClicked(InventoryItem invItem)
 	{
-		var baseItem = ItemDatabase.GetItem(invItem.item.id);
+		var baseItem = ItemDatabase.GetItem(invItem.Item.Id);
 
 		// Don't do anything if we are working with the bank
 		if (!gameManager.panelBank.gameObject.activeSelf)
@@ -560,7 +560,7 @@ public class Character : MonoBehaviour
 			ItemTypes itemType = baseItem.ItemType;
 			if (itemType == ItemTypes.Food)
 			{
-				FoodData data = JsonConvert.DeserializeObject<FoodData>(invItem.item.ItemData);
+				FoodData data = JsonConvert.DeserializeObject<FoodData>(invItem.Item.ItemData);
 				SetHealth(playerData.CurrentStats.Health, () =>
 				{
 					RemoveFromInventory(invItem);
@@ -568,7 +568,7 @@ public class Character : MonoBehaviour
 					UpdateHealthBar();
 				});
 			}
-			if (invItem.item.id >= 200 && invItem.item.id < 250)
+			if (invItem.Item.Id >= 200 && invItem.Item.Id < 250)
 			{
 				StartFire(invItem);
 			}
@@ -709,22 +709,22 @@ public class Character : MonoBehaviour
 
 	public Item GetBestTool(out WeaponData weaponData, Predicate<WeaponData> pred)
 	{
-		var weapons = playerData.Inventory.InventoryItems.Where(x => x.item.ItemType == ItemTypes.Weapon);
+		var weapons = playerData.Inventory.InventoryItems.Where(x => x.Item.ItemType == ItemTypes.Weapon);
 		weaponData = null;
 		Item item = null;
 		foreach (var weapon in weapons)
 		{
-			var wd = JsonConvert.DeserializeObject<WeaponData>(weapon.item.ItemData);
+			var wd = JsonConvert.DeserializeObject<WeaponData>(weapon.Item.ItemData);
 			if (pred(wd))
 			{
 				if (item == null)
 				{
-					item = weapon.item;
+					item = weapon.Item;
 					weaponData = wd;
 				}
 				else if (wd.ProbabilityBuff > weaponData.ProbabilityBuff)
 				{
-					item = weapon.item;
+					item = weapon.Item;
 					weaponData = wd;
 				}
 			}

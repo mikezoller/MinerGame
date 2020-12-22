@@ -32,8 +32,8 @@ public class EquipmentPanel : MonoBehaviour
 		{
 			cell.SetItem(new InventoryItem()
 			{
-				item = item,
-				quantity = 1,
+				Item = item,
+				Quantity = 1,
 			});
 		}
 	}

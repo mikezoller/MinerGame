@@ -25,8 +25,8 @@ namespace Miner.GameObjects
 				var outItem = recipe.Output.First();
 				invItems.Add(new InventoryItem()
 				{
-					item = ItemDatabase.GetItem(outItem.ItemId),
-					quantity = outItem.Quantity,
+					Item = ItemDatabase.GetItem(outItem.ItemId),
+					Quantity = outItem.Quantity,
 				});
 			}
 			itemGrid.items = invItems;
@@ -60,7 +60,7 @@ namespace Miner.GameObjects
 		public void ItemClicked(ItemCell cell)
 		{
 			var item = cell.item;
-			var recipe = recipes.FirstOrDefault(x => x.Output[0].ItemId == item.item.id);
+			var recipe = recipes.FirstOrDefault(x => x.Output[0].ItemId == item.Item.Id);
 
 			if (recipe != null)
 			{
@@ -81,16 +81,16 @@ namespace Miner.GameObjects
 							{
 								playerData.Inventory.Remove(new InventoryItem()
 								{
-									item = ItemDatabase.GetItem(req.ItemId),
-									quantity = req.Quantity,
+									Item = ItemDatabase.GetItem(req.ItemId),
+									Quantity = req.Quantity,
 								});
 							}
 							foreach (var res in recipe.Output)
 							{
 								playerData.Inventory.Store(new InventoryItem()
 								{
-									item = ItemDatabase.GetItem(res.ItemId),
-									quantity = res.Quantity,
+									Item = ItemDatabase.GetItem(res.ItemId),
+									Quantity = res.Quantity,
 								});
 							}
 							gameManager.ReloadInventory();

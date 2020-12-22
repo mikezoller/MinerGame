@@ -107,7 +107,7 @@ namespace Assets.Scripts
 				// Instantiate dropped items
 				foreach (Droppable drop in enemyData.Drops)
 				{
-					var o = (GameObject)Instantiate(Resources.Load(ItemDatabase.GetModelPath(drop.Item.item.id)), this.transform.position, Quaternion.identity);
+					var o = (GameObject)Instantiate(Resources.Load(ItemDatabase.GetModelPath(drop.Item.Item.Id)), this.transform.position, Quaternion.identity);
 
 					// TODO: handle probability
 					DroppableComponent sc = o.AddComponent(typeof(DroppableComponent)) as DroppableComponent;

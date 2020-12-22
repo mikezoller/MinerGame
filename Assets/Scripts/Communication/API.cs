@@ -20,6 +20,7 @@ namespace Miner.Communication
 
 		public static readonly string TOKEN_QUERY_PARAM = "token=";
 		public static readonly string GET_PLAYER_PATH = "api/players";
+		public static readonly string GET_TRADE_PATH = "api/trade";
 		public static readonly string GET_DATA_PATH = "api/data";
 
 		#region internal methods for http client
@@ -92,6 +93,8 @@ namespace Miner.Communication
 		internal static IEnumerator Get(string url, Action<UnityWebRequest> done = null) =>
 			Request(url, UnityWebRequest.kHttpVerbGET, null, done);
 
+		internal static IEnumerator Get(string url, object o, Action<UnityWebRequest> done = null) =>
+			Request(url, UnityWebRequest.kHttpVerbGET, JsonConvert.SerializeObject(o), done);
 		internal static Action<T1, T2> WrapCallback<T1, T2>(Action<T1, T2> doneCallback)
 		{
 			// in case of having missing done callback use empty function to skip checks

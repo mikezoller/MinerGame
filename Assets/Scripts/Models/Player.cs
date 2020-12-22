@@ -30,17 +30,17 @@ namespace Miner.Models
 		{
 			var reqItem = ItemDatabase.GetItem(itemId);
 			bool hasAtLeast = true;
-			if (reqItem.stackable || allowStackingAll)
+			if (reqItem.Stackable || allowStackingAll)
 			{
-				var invItem = InventoryItems.FirstOrDefault(x => x.item.id == itemId);
-				if (invItem == null || invItem.quantity < quantity)
+				var invItem = InventoryItems.FirstOrDefault(x => x.Item.Id == itemId);
+				if (invItem == null || invItem.Quantity < quantity)
 				{
 					hasAtLeast = false;
 				}
 			}
 			else
 			{
-				if (InventoryItems.Count(x => x.item.id == itemId) < quantity)
+				if (InventoryItems.Count(x => x.Item.Id == itemId) < quantity)
 				{
 					hasAtLeast = false;
 				}
@@ -53,23 +53,23 @@ namespace Miner.Models
 		{
 			return CanAdd(new InventoryItem()
 			{
-				item = item,
-				quantity = quantity
+				Item = item,
+				Quantity = quantity
 			});
 		}
 		public virtual bool CanAdd(InventoryItem invItem)
 		{
 			bool canAdd = true;
-			if (invItem.item.stackable || allowStackingAll)
+			if (invItem.Item.Stackable || allowStackingAll)
 			{
-				if (InventoryItems.FirstOrDefault(x => x.item.id == invItem.item.id) == null && InventoryItems.Count + 1 > Size)
+				if (InventoryItems.FirstOrDefault(x => x.Item.Id == invItem.Item.Id) == null && InventoryItems.Count + 1 > Size)
 				{
 					canAdd = false;
 				}
 			}
 			else
 			{
-				if (InventoryItems.Count + invItem.quantity > Size)
+				if (InventoryItems.Count + invItem.Quantity > Size)
 				{
 					canAdd = false;
 				}
@@ -82,29 +82,29 @@ namespace Miner.Models
 		{
 			Remove(new InventoryItem()
 			{
-				item = item,
-				quantity = quantity
+				Item = item,
+				Quantity = quantity
 			});
 		}
 		public virtual void Remove(InventoryItem invItem)
 		{
-			if (allowStackingAll || invItem.item.stackable)
+			if (allowStackingAll || invItem.Item.Stackable)
 			{
-				var item = this.InventoryItems.FirstOrDefault(i => i.item.id == invItem.item.id);
+				var item = this.InventoryItems.FirstOrDefault(i => i.Item.Id == invItem.Item.Id);
 				if (item != null)
 				{
-					item.quantity -= invItem.quantity;
+					item.Quantity -= invItem.Quantity;
 				}
-				if (item.quantity <= 0)
+				if (item.Quantity <= 0)
 				{
 					this.InventoryItems.Remove(item);
 				}
 			}
 			else
 			{
-				for (int i = 0; i < invItem.quantity; i++)
+				for (int i = 0; i < invItem.Quantity; i++)
 				{
-					var e = this.InventoryItems.FirstOrDefault(x => x.item.id == invItem.item.id);
+					var e = this.InventoryItems.FirstOrDefault(x => x.Item.Id == invItem.Item.Id);
 					if (e != null)
 					{
 						this.InventoryItems.Remove(e);
@@ -121,21 +121,21 @@ namespace Miner.Models
 		{
 			return Store(new InventoryItem()
 			{
-				item = item,
-				quantity = quantity
+				Item = item,
+				Quantity = quantity
 			});
 		}
 		public virtual bool Store(InventoryItem invItem, int index = -1)
 		{
 			bool success = false;
 
-			if ((allowStackingAll || invItem.item.stackable) && InventoryItems.Count(c => c.item.id == invItem.item.id) > 0)
+			if ((allowStackingAll || invItem.Item.Stackable) && InventoryItems.Count(c => c.Item.Id == invItem.Item.Id) > 0)
 			{
 				for (int i = 0; i < Size; i++)
 				{
-					if (InventoryItems[i].item.id == invItem.item.id)
+					if (InventoryItems[i].Item.Id == invItem.Item.Id)
 					{
-						InventoryItems[i].quantity += invItem.quantity;
+						InventoryItems[i].Quantity += invItem.Quantity;
 						success = true;
 						break;
 					}
@@ -147,36 +147,36 @@ namespace Miner.Models
 				{
 					if (index >= 0 && index < Size)
 					{
-						if (invItem.item.stackable || allowStackingAll)
+						if (invItem.Item.Stackable || allowStackingAll)
 						{
 							InventoryItems.Insert(index, invItem);
 						}
 						else
 						{
-							for (var i = 0; i < invItem.quantity; i++)
+							for (var i = 0; i < invItem.Quantity; i++)
 							{
 								InventoryItems.Insert(index, new InventoryItem()
 								{
-									item = invItem.item,
-									quantity = 1
+									Item = invItem.Item,
+									Quantity = 1
 								});
 							}
 						}
 					}
 					else
 					{
-						if (invItem.item.stackable || allowStackingAll)
+						if (invItem.Item.Stackable || allowStackingAll)
 						{
 							InventoryItems.Add(invItem);
 						}
 						else
 						{
-							for (var i = 0; i < invItem.quantity; i++)
+							for (var i = 0; i < invItem.Quantity; i++)
 							{
 								InventoryItems.Add(new InventoryItem()
 								{
-									item = invItem.item,
-									quantity = 1
+									Item = invItem.Item,
+									Quantity = 1
 								});
 							}
 						}
