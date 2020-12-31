@@ -1,4 +1,5 @@
-﻿using Miner.Communication;
+﻿using Assets.Scripts;
+using Miner.Communication;
 using Miner.Helpers;
 using Miner.Models;
 using Newtonsoft.Json;
@@ -13,7 +14,7 @@ using UnityEngine.EventSystems;
 
 namespace Miner.GameObjects
 {
-	public class ResourceObject : MonoBehaviour, IPointerClickHandler
+	public class ResourceObject : MonoBehaviour, IClickable
 	{
 		protected int actionId;
 		protected string StartTrigger;
@@ -130,12 +131,12 @@ namespace Miner.GameObjects
 			if (resourceType == ResourceType.Chopping)
 			{
 				tool = gameManager.character.GetBestTool(out wd, x => x.CanChop);
-				hasTool = true;
+				hasTool = tool != null;
 			}
 			else if (resourceType == ResourceType.Mining)
 			{
 				tool = gameManager.character.GetBestTool(out wd, x => x.CanMine);
-				hasTool = true;
+				hasTool = tool != null;
 			}
 			else { hasTool = true; }
 			return hasTool;
@@ -163,15 +164,13 @@ namespace Miner.GameObjects
 			else { needsTool = false; }
 			return needsTool;
 		}
-
+		
 		private void HarvestResource()
 		{
 
 		}
-
-		public void OnPointerClick(PointerEventData eventData)
+		public void Clicked()
 		{
-
 			var closest = this.GetComponent<Collider>().ClosestPoint(gameManager.character.transform.position);
 			NavMeshHit myNavHit;
 			if (NavMesh.SamplePosition(closest, out myNavHit, 100, -1))

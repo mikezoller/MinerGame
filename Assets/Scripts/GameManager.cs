@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Helpers;
+﻿using Assets.Scripts;
+using Assets.Scripts.Helpers;
 using Miner.GameObjects;
 using Miner.Models;
 using System;
@@ -105,6 +106,16 @@ namespace Miner
 						if (NavMesh.SamplePosition(hitInfo.point, out myNavHit, 1, NavMesh.AllAreas))
 						{
 							character.WalkTo(myNavHit.position);
+						}
+					}
+
+					var scripts = hitInfo.transform.GetComponents(typeof(MonoBehaviour));
+					foreach (var script in scripts)
+					{
+						var x = script as IClickable;
+						if (x != null)
+						{
+							x.Clicked();
 						}
 					}
 				}

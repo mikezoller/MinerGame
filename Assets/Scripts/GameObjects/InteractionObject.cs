@@ -1,4 +1,5 @@
-﻿using Miner.Models;
+﻿using Assets.Scripts;
+using Miner.Models;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -9,7 +10,7 @@ using UnityEngine.EventSystems;
 
 namespace Miner.GameObjects
 {
-	public class InteractionObject : MonoBehaviour, IPointerClickHandler
+	public class InteractionObject : MonoBehaviour, IClickable
 	{
 		public GameObject uiToShow;
 		public Player playerData;
@@ -19,12 +20,7 @@ namespace Miner.GameObjects
 			yield return null;
 		}
 
-		public void OnPointerClick(PointerEventData eventData)
-		{
-			Clicked(eventData);
-		}
-
-		public virtual void Clicked(PointerEventData eventData)
+		public void Clicked()
 		{
 			var player = GameObject.FindGameObjectWithTag("Player");
 			var character = player.GetComponent<Character>();

@@ -61,6 +61,8 @@ public class Startup : MonoBehaviour
 		{
 			panelLoading.SetProgress(1f);
 			gameManager.gameObject.SetActive(true);
+			//gameManager.GetComponent<GameManager>().enabled = true;
+
 			panelLoading.gameObject.SetActive(false);
 		}
 	}

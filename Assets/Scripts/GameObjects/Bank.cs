@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace Miner.GameObjects
 {
 
-	public class Bank : MonoBehaviour, IInteractionTile
+	public class Bank : MonoBehaviour, IClickable
 	{
 		public ItemGrid itemGrid;
 
@@ -81,6 +81,11 @@ namespace Miner.GameObjects
 		public void Reload()
 		{
 			itemGrid.Reload();
+		}
+
+		public void Clicked()
+		{
+			// Do nothing
 		}
 		
 	}

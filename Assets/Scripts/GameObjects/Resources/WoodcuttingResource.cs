@@ -7,6 +7,8 @@ namespace Assets.Scripts.GameObjects.Resources
 	{
 		None = 0,
 		Ash = 10,
+		Oak = 20,
+		Pine = 30,
 	}
 	public class WoodcuttingResource : ResourceObject
 	{
@@ -67,7 +69,13 @@ namespace Assets.Scripts.GameObjects.Resources
 			{
 				case TreeType.Ash:
 					actionId = 200;
-					break; ;
+					break;
+				case TreeType.Oak:
+					actionId = 201;
+					break;
+				case TreeType.Pine:
+					actionId = 202;
+					break;
 				case TreeType.None:
 				default:
 					actionId = -1;

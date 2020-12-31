@@ -46,12 +46,11 @@ namespace Assets.Scripts.GameObjects
 
 		}
 
-		public override void Clicked(PointerEventData eventData)
+		public void Clicked()
 		{
 			if (!Container.RequirementsFullfilled)
 			{
 				panelRequirements.SetObstacle(this);
-				base.Clicked(eventData);
 			}
 			else
 			{
