@@ -70,7 +70,17 @@ namespace Assets.Scripts.GameObjects
 			{
 				panelRequirements.SetObstacle(this);
 				panelRequirements.Reload();
-				base.Clicked();
+			}
+			else
+			{
+				// If complete, just walk to the clicked position
+				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+				RaycastHit hitInfo;
+				// hit something not in the player layer
+				if (Physics.Raycast(ray, out hitInfo) && GUIUtility.hotControl == 0)
+				{
+					character.WalkTo(hitInfo.point);
+				}
 			}
 		}
 		public void AddInitialItem(InventoryItem item)
