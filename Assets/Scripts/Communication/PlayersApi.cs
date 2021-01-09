@@ -8,6 +8,7 @@ using System.Collections;
 using Miner.Models;
 using static Miner.Communication.MultiActionRequest;
 using Assets.Scripts;
+using Assets.Scripts.Models.Quests;
 
 namespace Miner.Communication
 {
@@ -48,7 +49,7 @@ namespace Miner.Communication
 			try
 			{
 				return Post(Path(GET_PLAYER_PATH + "/UpdatePlayerLocation"), new
-				{ playerName, X = location.x, Y = location.y, Z =location.z },
+				{ playerName, X = location.x, Y = location.y, Z = location.z },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)
@@ -338,6 +339,63 @@ namespace Miner.Communication
 			{
 				return Post(Path(GET_PLAYER_PATH + "/MultiAction"), new
 				{ playerName, requests },
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(false, RequestError(request));
+						else
+							done(true, null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(false, ex.Message);
+			}
+			return null;
+		}
+		public static IEnumerator UpdateQuestProgress(
+				string playerName, QuestProgress questProgress,
+				Action<bool, UpdateQuestResponse, string> doneCallback = null)
+		{
+
+			var done = WrapCallback(doneCallback);
+			try
+			{
+				return Post(Path(GET_PLAYER_PATH + "/UpdateQuestProgress"), new
+				{ playerName, questProgress },
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(false, null, RequestError(request));
+						else
+							done(true, RequestResponse<UpdateQuestResponse>(request), null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(false, null, ex.Message);
+			}
+			return null;
+		}
+		public class UpdateQuestResponse
+		{
+			public int QuestId { get; set; }
+			public bool NowComplete { get; set; }
+			public List<SkillExperience> ExpRewards { get; set; }
+		}
+		public static IEnumerator CollectQuestItems(
+				string playerName, int questId,
+				Action<bool, string> doneCallback = null)
+		{
+			var done = WrapCallback(doneCallback);
+			try
+			{
+				return Post(Path(GET_PLAYER_PATH + "/CollectQuestItems"), new
+				{ playerName, questId },
 					(request) =>
 					{
 						if (request.isNetworkError || request.responseCode != 200)

@@ -1,6 +1,8 @@
 ﻿using Assets.Scripts;
+using Assets.Scripts.GameObjects;
 using Assets.Scripts.Helpers;
 using Miner.GameObjects;
+using Miner.Helpers;
 using Miner.Models;
 using System;
 using System.IO;
@@ -8,6 +10,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.AI;
 using static MessagePanel;
+using static Miner.Communication.PlayersApi;
 
 namespace Miner
 {
@@ -24,6 +27,7 @@ namespace Miner
 		public GameObjects.PanelRequirements panelRequirements;
 		public GameObject panelLoading;
 		public EquipmentPanel panelEquipment;
+		public QuestPanel questPanel;
 
 		public Character character;
 		// Start is called before the first frame update
@@ -36,6 +40,7 @@ namespace Miner
 			}
 			character.GetComponent<NavMeshAgent>().Warp(character.initialPosition);
 
+			HandleQuests();
 
 			inventory.SetPlayerInventory(character.playerData.Inventory);
 			panelBank.SetPlayerBank(character.playerData.Bank);
@@ -51,6 +56,44 @@ namespace Miner
 
 			ShowHUD(true);
 
+		}
+
+		private void HandleQuests()
+		{
+			var progress = character.playerData.Progress.QuestProgress;
+
+			var q1p = QuestManager.GetQuestProgress(character, 1);
+			var q1 = QuestDatabase.GetQuest(1);
+			var bridgeGo = GameObject.Find("woodBridge");
+			var repObs = bridgeGo.GetComponent<RepairableObstacle>();
+			foreach (var qItem in q1.Checkpoints[0].Items)
+			{
+				repObs.RequiredItems.Add(new RequiredItem() { ItemId = qItem.ItemId, Quantity = qItem.Quantity });
+			}
+			if (q1p != null)
+			{
+				if (q1p.Checkpoints.Count > 0)
+				{
+					foreach (var pItem in q1p.Checkpoints[0].Items)
+					{
+						var item = ItemDatabase.GetItem(pItem.ItemId);
+						repObs.AddInitialItem(new InventoryItem() { Item = item, Quantity = pItem.Quantity });
+						repObs.Refresh();
+					}
+				}
+			}
+			repObs.CheckRequirements();
+		}
+
+		public void QuestUpdated(UpdateQuestResponse response)
+		{
+			if (response.NowComplete)
+			{
+				var qp = QuestManager.GetQuestProgress(character, response.QuestId);
+				qp.Complete = true;
+			}
+			
+			questPanel.Refresh();
 		}
 
 		public void ShowMessage(string message, MessageType type, Action accept = null, Action cancel = null)
@@ -149,7 +192,7 @@ namespace Miner
 			Debug.Log("Game Saved");
 		}
 
-		
+
 
 		public void ReloadInventory()
 		{

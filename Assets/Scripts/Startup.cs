@@ -23,12 +23,13 @@ public class Startup : MonoBehaviour
 	private float GetProgress()
 	{
 		float progress = 0;
-		float step = 1f / 5.0f;
+		float step = 1f / 6.0f;
 
 		if (ItemDatabase.initialized) progress += step;
 		if (EnemyDatabase.initialized) progress += step;
 		if (RecipeDatabase.initialized) progress += step;
 		if (ResourceActionDatabase.initialized) progress += step;
+		if (QuestDatabase.initialized) progress += step;
 		if (characterLoaded) progress += step;
 
 		return progress;
@@ -36,10 +37,11 @@ public class Startup : MonoBehaviour
 	private IEnumerator InitializeData()
 	{
 		bool failed = false;
-		StartCoroutine(ItemDatabase.BuildItemDatabase(() => failed = true));
+		StartCoroutine(ItemDatabase.Initialize(() => failed = true));
 		StartCoroutine(EnemyDatabase.Initialize(() => failed = true));
 		StartCoroutine(RecipeDatabase.Initialize(() => failed = true));
 		StartCoroutine(ResourceActionDatabase.Initialize(() => failed = true));
+		StartCoroutine(QuestDatabase.Initialize(() => failed = true));
 		LoadPlayerData(() => failed = true);
 
 		yield return new WaitUntil(() =>
@@ -49,6 +51,7 @@ public class Startup : MonoBehaviour
 && EnemyDatabase.initialized
 && RecipeDatabase.initialized
 && ResourceActionDatabase.initialized
+&& QuestDatabase.initialized
 && characterLoaded)
 || failed;
 		});

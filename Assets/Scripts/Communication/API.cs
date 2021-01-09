@@ -101,6 +101,12 @@ namespace Miner.Communication
 			// on null or not callback instance.
 			return doneCallback ?? ((_arg1, _arg2) => { });
 		}
+		internal static Action<T1, T2, T3> WrapCallback<T1, T2, T3>(Action<T1, T2, T3> doneCallback)
+		{
+			// in case of having missing done callback use empty function to skip checks
+			// on null or not callback instance.
+			return doneCallback ?? ((_arg1, _arg2, _arg3) => { });
+		}
 	}
 	#endregion
 }

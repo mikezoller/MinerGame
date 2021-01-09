@@ -1,4 +1,5 @@
 using Assets.Scripts;
+using Assets.Scripts.Models.Quests;
 using Miner.Helpers;
 using System;
 using System.Collections.Generic;
@@ -213,6 +214,7 @@ namespace Miner.Models
 	public class Progress
 	{
 		public List<Skill> Skills { get; set; } = new List<Skill>();
+		public List<QuestProgress> QuestProgress { get; set; }
 
 		public Progress()
 		{

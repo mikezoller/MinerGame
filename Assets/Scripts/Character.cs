@@ -554,8 +554,8 @@ public class Character : MonoBehaviour
 	{
 		var baseItem = ItemDatabase.GetItem(invItem.Item.Id);
 
-		// Don't do anything if we are working with the bank
-		if (!gameManager.panelBank.gameObject.activeSelf)
+		// Don't do anything if we are working with the panels
+		if (!PanelsActive())
 		{
 			ItemTypes itemType = baseItem.ItemType;
 			if (itemType == ItemTypes.Food)
@@ -584,6 +584,12 @@ public class Character : MonoBehaviour
 				SetEquipment(EquipmentSpot.Weapon, baseItem);
 			}
 		}
+	}
+
+	private bool PanelsActive()
+	{
+		return gameManager.panelBank.gameObject.activeSelf
+			|| gameManager.panelRequirements.gameObject.activeSelf;
 	}
 
 	// MAIN Equipment method. Calls both game obejct and server methods if necessary

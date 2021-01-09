@@ -20,7 +20,7 @@ namespace Miner.GameObjects
 		public void SetObstacle(RepairableObstacle obs)
 		{
 			obstacle = obs;
-			itemGrid.items = obs.Container.InventoryItems;
+			itemGrid.items = obs.AddedItemsContainer.InventoryItems;
 		}
 		private void Awake()
 		{
@@ -35,7 +35,7 @@ namespace Miner.GameObjects
 		{
 			InventoryItem returnItem = obstacle.AddItem(item);
 			Reload();
-			Debug.Log("Unlocked " + this.obstacle.Container.RequirementsFullfilled);
+			Debug.Log("Unlocked " + this.obstacle.AddedItemsContainer.RequirementsFullfilled);
 			return returnItem;
 		}
 		public void Reload()

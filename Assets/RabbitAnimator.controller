@@ -466,7 +466,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: EnemyAnimator
+  m_Name: RabbitAnimator
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: Idle
@@ -474,19 +474,19 @@ AnimatorController:
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: walking
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: striking
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -677,7 +677,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 8349542763059015795, guid: 3fcb353af979bb846b7f1ea6295adfef, type: 3}
+  m_Motion: {fileID: 8349542763059015795, guid: 3ce1cd5f67b644d41bfd01f72cec111f, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -883,7 +883,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -8945691123924629249, guid: 3fcb353af979bb846b7f1ea6295adfef, type: 3}
+  m_Motion: {fileID: -8945691123924629249, guid: 3ce1cd5f67b644d41bfd01f72cec111f, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -910,7 +910,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 4682765751262850392, guid: 3fcb353af979bb846b7f1ea6295adfef, type: 3}
+  m_Motion: {fileID: 4723146814002874508, guid: 3ce1cd5f67b644d41bfd01f72cec111f, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

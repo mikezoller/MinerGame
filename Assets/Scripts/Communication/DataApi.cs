@@ -9,6 +9,7 @@ using Miner.Models;
 using Assets.Scripts;
 using Miner.Helpers;
 using Assets.Scripts.Models;
+using Assets.Scripts.Models.Quests;
 
 namespace Miner.Communication
 {
@@ -29,6 +30,31 @@ namespace Miner.Communication
 							done(null, RequestError(request));
 						else
 							done(RequestResponse<List<Item>>(request), null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(null, ex.Message);
+			}
+
+			return null;
+		}
+		public static IEnumerator GetQuests(
+			Action<List<Quest>, string> doneCallback = null)
+		{
+			var done = WrapCallback(doneCallback);
+
+			try
+			{
+				return Get(Path(GET_DATA_PATH + "/getquests"),
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(null, RequestError(request));
+						else
+							done(RequestResponse<List<Quest>>(request), null);
 					});
 			}
 			catch (Exception ex)

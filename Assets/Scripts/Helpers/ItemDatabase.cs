@@ -16,7 +16,7 @@ namespace Miner.Helpers
             {
 				if (!initialized)
 				{
-					BuildItemDatabase();
+					Initialize();
 				}
                 return items;
             }
@@ -28,7 +28,7 @@ namespace Miner.Helpers
         {
 			if (!initialized)
 			{
-				BuildItemDatabase();
+				Initialize();
 			}
 			return items.Find(item => item.Id == id);
         }
@@ -38,7 +38,7 @@ namespace Miner.Helpers
 			return $"items/" + id;
 		}
 
-		public static IEnumerator BuildItemDatabase(Action fail = null)
+		public static IEnumerator Initialize(Action fail = null)
 		{
 			return Communication.DataApi.GetItems((items, err) =>
 			{
