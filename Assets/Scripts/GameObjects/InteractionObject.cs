@@ -20,6 +20,7 @@ namespace Miner.GameObjects
 			yield return null;
 		}
 
+
 		public virtual void Clicked()
 		{
 			var player = GameObject.FindGameObjectWithTag("Player");

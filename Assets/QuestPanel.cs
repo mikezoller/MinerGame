@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Helpers;
+﻿using Assets.Scripts.GameObjects;
+using Assets.Scripts.Helpers;
 using Assets.Scripts.Models.Quests;
 using Miner.GameObjects;
 using Miner.Helpers;
@@ -20,6 +21,7 @@ public class QuestPanel : MonoBehaviour
 		character = player.GetComponent<Character>();
 		Refresh();
 	}
+
 
 	public void Refresh()
 	{

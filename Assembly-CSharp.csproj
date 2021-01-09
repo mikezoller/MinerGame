@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\GameObjects\RequiredItemsContainer.cs" />
     <Compile Include="Assets\Scripts\Models\Quests\QuestCheckpoint.cs" />
     <Compile Include="Assets\Scripts\GameObjects\ItemGrid.cs" />
+    <Compile Include="Assets\Scripts\ListCreator.cs" />
     <Compile Include="Assets\Scripts\Models\Trade\BuyRequest.cs" />
     <Compile Include="Assets\Scripts\GameObjects\Resources\WoodcuttingResource.cs" />
     <Compile Include="Assets\Scripts\Models\Skill.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Assets\Scripts\GameObjects\CraftingObject.cs" />
     <Compile Include="Assets\Scripts\Models\EnemyData.cs" />
     <Compile Include="Assets\Scripts\GameObjects\StatDisplay.cs" />
+    <Compile Include="Assets\QuestPanel.cs" />
     <Compile Include="Assets\Scripts\Communication\TradeApi.cs" />
     <Compile Include="Assets\Scripts\Character.cs" />
     <Compile Include="Assets\Scripts\GameObjects\SkillsPanel.cs" />
@@ -96,6 +98,7 @@
     <Compile Include="Assets\Scripts\GameObjects\RepairableObstacle.cs" />
     <Compile Include="Assets\Scripts\Helpers\EnemyDatabase.cs" />
     <Compile Include="Assets\Scripts\GameObjects\ItemCell.cs" />
+    <Compile Include="Assets\Scripts\ItemDetails.cs" />
     <Compile Include="Assets\Scripts\Models\Quests\CheckpointProgress.cs" />
     <Compile Include="Assets\Scripts\Models\Quests\QuestItem.cs" />
     <Compile Include="Assets\Scripts\Models\Trade\SellRequest.cs" />
@@ -105,6 +108,7 @@
     <Compile Include="Assets\Scripts\Communication\DataApi.cs" />
     <Compile Include="Assets\Scripts\Helpers\InventoryService.cs" />
     <Compile Include="Assets\Scripts\Communication\API.cs" />
+    <Compile Include="Assets\Scripts\Helpers\QuestManager.cs" />
     <Compile Include="Assets\Scripts\GameObjects\Resources\MiningResource.cs" />
     <Compile Include="Assets\Scripts\RayCastHit.cs" />
     <Compile Include="Assets\Scripts\Models\Player.cs" />
@@ -115,10 +119,7 @@
     <Compile Include="Assets\Scripts\EquippedItems.cs" />
     <Compile Include="Assets\Scripts\Helpers\CameraOrbit.cs" />
     <Compile Include="Assets\Scripts\Models\Item.cs" />
-    <Compile Include="Assets\Scripts\Helpers\QuestManager.cs" />
-    <Compile Include="Assets\Scripts\ListCreator.cs" />
-    <Compile Include="Assets\Scripts\ItemDetails.cs" />
-    <Compile Include="Assets\QuestPanel.cs" />
+    <Compile Include="Assets\Scripts\GameObjects\ClosablePanel.cs" />
   </ItemGroup>
   <ItemGroup>
      <None Include="Assets\Samples\Terrain Tools\0.1.0-preview\Terrain Assets\ThirdPartyNotices.txt" />

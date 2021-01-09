@@ -23,7 +23,6 @@ namespace Miner.Scripts
 		// Use this for initialization
 		void Start()
 		{
-			Refresh();			
 		}
 
 		public void SetItems(IEnumerable<ListItemInfo> newItems)

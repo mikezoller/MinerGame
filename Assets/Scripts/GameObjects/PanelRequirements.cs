@@ -11,7 +11,7 @@ using UnityEngine.UI;
 namespace Miner.GameObjects
 {
 
-	public class PanelRequirements : MonoBehaviour
+	public class PanelRequirements : ClosablePanel
 	{
 		public ItemGrid itemGrid;
 

@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Helpers;
 using Assets.Scripts.Models.Quests;
 using Miner;
+using Miner.Communication;
 using Miner.GameObjects;
 using Miner.Helpers;
 using Miner.Models;
@@ -39,6 +40,12 @@ namespace Assets.Scripts.GameObjects
 
 			var player = GameObject.FindGameObjectWithTag("Player");
 			character = player.GetComponent<Character>();
+
+			panelRequirements.OnClosedDelegate += OnUiClosed;
+		}
+		void OnUiClosed()
+		{
+			UpdateQuest();
 		}
 		public void FixedUpdate()
 		{
@@ -52,15 +59,15 @@ namespace Assets.Scripts.GameObjects
 
 		public void CheckRequirements()
 		{
-			if (AddedItemsContainer.RequirementsFullfilled)
+			bool done = AddedItemsContainer.RequirementsFullfilled;
+
+			FixedModel.SetActive(done);
+			BrokenModel.SetActive(!done);
+
+			var obstacles = GetComponentsInChildren<NavMeshObstacle>(true);
+			foreach (var obstacle in obstacles)
 			{
-				FixedModel.SetActive(true);
-				BrokenModel.SetActive(false);
-			}
-			else
-			{
-				FixedModel.SetActive(false);
-				BrokenModel.SetActive(true);
+				obstacle.gameObject.SetActive(!done);
 			}
 		}
 
@@ -70,6 +77,7 @@ namespace Assets.Scripts.GameObjects
 			{
 				panelRequirements.SetObstacle(this);
 				panelRequirements.Reload();
+				base.Clicked();
 			}
 			else
 			{
@@ -96,7 +104,7 @@ namespace Assets.Scripts.GameObjects
 			if (AddedItemsContainer.CanAdd(item) && !AddedItemsContainer.RequirementsFullfilled)
 			{
 				AddedItemsContainer.Store(item);
-				UpdateQuest(item);
+				//UpdateQuest(item);
 			}
 			else
 			{
@@ -105,60 +113,121 @@ namespace Assets.Scripts.GameObjects
 
 			if (AddedItemsContainer.RequirementsFullfilled)
 			{
-				CompleteQuest();
-				var obstacles = GetComponentsInChildren<NavMeshObstacle>();
-				foreach (var obstacle in obstacles)
-				{
-					obstacle.gameObject.SetActive(false);
-				}
-
-				BrokenModel.SetActive(false);
-				FixedModel.SetActive(true);
+				//CompleteQuest();
+				CheckRequirements();
 			}
 
 			return returnItem;
 		}
-
-		private void UpdateQuest(InventoryItem item)
+		private void UpdateQuest()
 		{
 			var qp = QuestManager.GetQuestProgress(character, questId);
+			Dictionary<int, int> itemsAdded = new Dictionary<int, int>();
 
 			if (checkpointNumber != 0 && qp.Checkpoints.Count >= checkpointNumber)
 			{
-				var existing = qp.Checkpoints[checkpointNumber - 1].Items.FirstOrDefault(x => x.ItemId == item.Item.Id);
-				if (existing != null)
+				bool isComplete = true;
+				var baseQuest = QuestDatabase.GetQuest(questId);
+				var baseCheckpoint = baseQuest.Checkpoints[checkpointNumber - 1];
+
+				var checkpoint = qp.Checkpoints[checkpointNumber - 1];
+				foreach (var item in AddedItemsContainer.InventoryItems)
 				{
-					existing.Quantity += item.Quantity;
+					int numAdded = 0;
+
+					// Update quest progress
+					var existing = checkpoint.Items.FirstOrDefault(x => x.ItemId == item.Item.Id);
+					if (existing != null)
+					{
+						numAdded = item.Quantity - existing.Quantity;
+						existing.Quantity = item.Quantity;
+					}
+					else
+					{
+						checkpoint.Items.Add(new QuestItem() { ItemId = item.Item.Id, Quantity = item.Quantity });
+						numAdded = item.Quantity;
+					}
+
+					// Add to dictionary of items to remove
+					if (itemsAdded.ContainsKey(item.Item.Id))
+					{
+						itemsAdded[item.Item.Id] += numAdded;
+					}
+					else
+					{
+						itemsAdded.Add(item.Item.Id, numAdded);
+					}
+
+					// Check if we have fulfilled this checkpoints requirements for this item
+					if (item.Quantity != baseCheckpoint.Items.Find(x => x.ItemId == item.Item.Id).Quantity)
+					{
+						isComplete = false;
+					}
 				}
-				else
+
+				// Mark complete if all required items have been filled
+				// Also make sure the number of added inventory items match, otherwise wouldn't have had to set isComplete above
+				if (AddedItemsContainer.InventoryItems.Count == baseCheckpoint.Items.Count && isComplete)
 				{
-					qp.Checkpoints[checkpointNumber - 1].Items.Add(new QuestItem() { ItemId = item.Item.Id, Quantity = item.Quantity });
+					checkpoint.Complete = true;
+					checkpoint.CompletedDate = DateTime.UtcNow;
 				}
-				qp.Checkpoints[checkpointNumber - 1].CompletedDate = DateTime.UtcNow;
 			}
 
-			StartCoroutine(QuestManager.UpdateQuest(questId, qp, (success, response, err) => { if (success) { SendMessageUpwards("QuestUpdated", response); } }));
-		}
 
-		public void CompleteQuest()
-		{
-			var qp = QuestManager.GetQuestProgress(character, questId);
-
-			if (checkpointNumber != 0 && qp.Checkpoints.Count >= checkpointNumber)
+			if (itemsAdded.Count > 0)
 			{
-				qp.Checkpoints[checkpointNumber - 1].Complete = true;
-				qp.Checkpoints[checkpointNumber - 1].CompletedDate = DateTime.UtcNow;
-			}
-
-			StartCoroutine(QuestManager.UpdateQuest(questId, qp, (success, response, err) =>
-			{
-				if (success)
+				StartCoroutine(QuestManager.UpdateQuest(questId, qp, (success, response, err) =>
 				{
-					SendMessageUpwards("QuestUpdated", response);
-				}
+					if (success)
+					{
+						SendMessageUpwards("QuestUpdated", response);
+						// Remove items from players server inventory
+						StartCoroutine(PlayersApi.RemoveFromInventory(character.playerData.Name, itemsAdded));
+					}
+				}));
 			}
-			));
 		}
+		//private void UpdateQuest(InventoryItem item)
+		//{
+		//	var qp = QuestManager.GetQuestProgress(character, questId);
+
+		//	if (checkpointNumber != 0 && qp.Checkpoints.Count >= checkpointNumber)
+		//	{
+		//		var existing = qp.Checkpoints[checkpointNumber - 1].Items.FirstOrDefault(x => x.ItemId == item.Item.Id);
+		//		if (existing != null)
+		//		{
+		//			existing.Quantity += item.Quantity;
+		//		}
+		//		else
+		//		{
+		//			qp.Checkpoints[checkpointNumber - 1].Items.Add(new QuestItem() { ItemId = item.Item.Id, Quantity = item.Quantity });
+		//		}
+		//		qp.Checkpoints[checkpointNumber - 1].CompletedDate = DateTime.UtcNow;
+		//	}
+
+		//	StartCoroutine(QuestManager.UpdateQuest(questId, qp, (success, response, err) => { if (success) { SendMessageUpwards("QuestUpdated", response); } }));
+		//}
+
+		//public void CompleteQuest()
+		//{
+		//	var qp = QuestManager.GetQuestProgress(character, questId);
+
+		//	if (checkpointNumber != 0 && qp.Checkpoints.Count >= checkpointNumber)
+		//	{
+		//		qp.Checkpoints[checkpointNumber - 1].Complete = true;
+		//		qp.Checkpoints[checkpointNumber - 1].CompletedDate = DateTime.UtcNow;
+		//	}
+
+		//	StartCoroutine(QuestManager.UpdateQuest(questId, qp, (success, response, err) =>
+		//	{
+		//		if (success)
+		//		{
+		//			SendMessageUpwards("QuestUpdated", response);
+		//		}
+		//	}
+		//	));
+		//}
 	}
 
 	[Serializable]

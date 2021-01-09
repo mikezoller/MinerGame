@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.GameObjects;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -22,10 +23,17 @@ namespace Miner.GameObjects
 			m_EventSystem = GetComponent<EventSystem>();
 		}
 
+
 		public void HideExtra()
 		{
-			bankPanel.SetActive(false);
-			panelRequirements.SetActive(false);
+			if (bankPanel.activeInHierarchy)
+			{
+				bankPanel.SetActive(false);
+			}
+			if (panelRequirements.activeInHierarchy)
+			{
+				panelRequirements.GetComponent<ClosablePanel>().Close();
+			}
 		}
 		public bool DidHit(Ray ray)
 		{

@@ -194,6 +194,35 @@ namespace Miner.Communication
 			return null;
 		}
 
+		public static IEnumerator RemoveFromInventory(
+			string playerName, Dictionary<int, int> items,
+			Action<bool, string> doneCallback = null)
+		{
+			var done = WrapCallback(doneCallback);
+
+			try
+			{
+				//return Post(path(GET_PLAYER_PATH + "/addToInventory" + "?playerId=" + userId + "&itemId=" + itemId +"&quantity=" +quantity), null,
+				return Post(Path(GET_PLAYER_PATH + "/RemoveMultipleFromInventory"), new
+				{ playerName, items },
+					(request) =>
+					{
+						if (request.isNetworkError || request.responseCode != 200)
+							done(false, RequestError(request));
+						else
+							done(true, null);
+					});
+			}
+			catch (Exception ex)
+			{
+				// catch here all the exceptions ensure never die
+				Debug.Log(ex.Message);
+				done(false, ex.Message);
+			}
+			return null;
+		}
+
+
 		public static IEnumerator TransferToBank(
 			string playerName, int itemId, int quantity,
 			Action<bool, string> doneCallback = null)
