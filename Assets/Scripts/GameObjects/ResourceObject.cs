@@ -171,7 +171,7 @@ namespace Miner.GameObjects
 		}
 		public void Clicked()
 		{
-			var closest = this.GetComponent<Collider>().ClosestPoint(gameManager.character.transform.position);
+			var closest = this.GetComponent<Collider>().ClosestPointOnBounds(gameManager.character.transform.position);
 			NavMeshHit myNavHit;
 			if (NavMesh.SamplePosition(closest, out myNavHit, 100, -1))
 			{
