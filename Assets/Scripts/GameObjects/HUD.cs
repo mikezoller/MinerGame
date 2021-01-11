@@ -11,6 +11,7 @@ namespace Miner.GameObjects
         public Inventory inventory;
 		public GameObject bankPanel;
 		public GameObject panelRequirements;
+		public GameObject panelItemOptions;
 		private GraphicRaycaster m_Raycaster;
 		private PointerEventData m_PointerEventData;
 		private EventSystem m_EventSystem;
@@ -33,6 +34,10 @@ namespace Miner.GameObjects
 			if (panelRequirements.activeInHierarchy)
 			{
 				panelRequirements.GetComponent<ClosablePanel>().Close();
+			}
+			if (panelItemOptions.activeInHierarchy)
+			{
+				panelItemOptions.GetComponent<ClosablePanel>().Close();
 			}
 		}
 		public bool DidHit(Ray ray)

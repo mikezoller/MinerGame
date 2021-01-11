@@ -54,6 +54,26 @@ public class Character : MonoBehaviour
 		statDisplay.Init(new Vector3(0, bounds.size.y, 0));
 		UpdateHealthBar();
 	}
+
+	public void DropFromInventory(InventoryItem invItem)
+	{
+		if (playerData.Inventory.HasAtLeast(invItem.Item.Id, invItem.Quantity))
+		{
+			StartCoroutine(PlayersApi.RemoveFromInventory(playerData.Name, invItem.Item.Id, invItem.Quantity, (success, err) =>
+			{
+				playerData.Inventory.Remove(invItem);
+				gameManager.inventory.Reload();
+				// Instantiate dropped items
+				var o = (GameObject)Instantiate(Resources.Load(ItemDatabase.GetModelPath(invItem.Item.Id)), this.transform.position, Quaternion.identity);
+
+				// TODO: handle probability
+				DroppableComponent sc = o.AddComponent(typeof(DroppableComponent)) as DroppableComponent;
+				o.AddComponent<BoxCollider>();
+				sc.Item = invItem;
+			}));
+			
+		}
+	}
 	public void WalkTo(Vector3 pos)
 	{
 		agent.stoppingDistance = 0;
@@ -91,7 +111,7 @@ public class Character : MonoBehaviour
 		if (droppable != null && !droppable.Claimed)
 		{
 			droppable.Claimed = true;
-			var i = droppable.Item.Copy(1);
+			var i = droppable.Item.Copy();
 			AddToInventory(i, () =>
 			{
 				Destroy(hit.transform.gameObject);
@@ -457,8 +477,16 @@ public class Character : MonoBehaviour
 
 	public void TransferToInventory(InventoryItem item, Action success = null, Action fail = null)
 	{
+		if (item.Quantity > playerData.Inventory.OpenSpace)
+		{
+			item.Quantity = playerData.Inventory.OpenSpace;
+		}
 		if (playerData.Inventory.CanAdd(item))
 		{
+			if (!playerData.Bank.HasAtLeast(item.Item.Id, item.Quantity))
+			{
+				item.Quantity = playerData.Bank.GetCount(item.Item.Id);
+			}
 			StartCoroutine(PlayersApi.TransferToInventory("mwnzoller", item.Item.Id, item.Quantity, (user, err) =>
 			{
 				if (err != null)
@@ -479,6 +507,10 @@ public class Character : MonoBehaviour
 	{
 		if (playerData.Bank.CanAdd(item))
 		{
+			if (!playerData.Inventory.HasAtLeast(item.Item.Id, item.Quantity))
+			{
+				item.Quantity = playerData.Inventory.GetCount(item.Item.Id);
+			}
 			StartCoroutine(PlayersApi.TransferToBank("mwnzoller", item.Item.Id, item.Quantity, (user, err) =>
 			{
 				if (err != null)

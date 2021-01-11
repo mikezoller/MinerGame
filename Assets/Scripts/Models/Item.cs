@@ -59,6 +59,14 @@ namespace Miner.Models
 				Quantity = qty
 			};
 		}
+		public InventoryItem Copy()
+		{
+			return new InventoryItem()
+			{
+				Item = this.Item,
+				Quantity = this.Quantity
+			};
+		}
 	}
 
 	[Serializable]

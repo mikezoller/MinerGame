@@ -27,10 +27,11 @@ namespace Assets.Scripts.GameObjects
 			}
 		}
 
-		public void Clicked()
+		public override void Clicked()
 		{
 			var script = uiToShow.GetComponent<PanelCraft>();
 			script.Activate(recipes);
+			base.Clicked();
 		}
 
 	}

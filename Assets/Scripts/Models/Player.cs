@@ -20,6 +20,7 @@ namespace Miner.Models
 	public abstract class ItemContainer
 	{
 		public abstract int Size { get; }
+		public int OpenSpace { get { return Size - InventoryItems.Count; } }
 		public List<InventoryItem> InventoryItems { get; set; } = new List<InventoryItem>();
 		protected bool allowStackingAll = false;
 
@@ -77,6 +78,17 @@ namespace Miner.Models
 			}
 
 			return canAdd;
+		}
+
+		public int GetCount(int itemId)
+		{
+			int count = 0;
+			var items = this.InventoryItems.Where(x => x.Item.Id == itemId);
+			foreach(var item in items)
+			{
+				count += item.Quantity;
+			}
+			return count;
 		}
 
 		public virtual void Remove(Item item, int quantity = 1)

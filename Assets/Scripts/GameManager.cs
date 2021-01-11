@@ -5,6 +5,7 @@ using Miner.GameObjects;
 using Miner.Helpers;
 using Miner.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
@@ -28,6 +29,7 @@ namespace Miner
 		public GameObject panelLoading;
 		public EquipmentPanel panelEquipment;
 		public QuestPanel questPanel;
+		public PanelItemOptions itemOptionsPanel;
 
 		public Character character;
 		// Start is called before the first frame update
@@ -50,14 +52,24 @@ namespace Miner
 			panelMessage.HideMessage();
 			panelBank.gameObject.SetActive(false);
 			panelRequirements.gameObject.SetActive(false);
+			itemOptionsPanel.gameObject.SetActive(false);
+
 			var cpgo = GameObject.FindWithTag("CraftPanel");
 			cpgo.SetActive(false);
 			craftPanel = cpgo.GetComponent<PanelCraft>();
 
 			ShowHUD(true);
-
 		}
 
+		public void ShowItemOptionsPanel(List<ButtonItemDetails> options)
+		{
+			itemOptionsPanel.SetButtons(options);
+			itemOptionsPanel.gameObject.SetActive(true);
+		}
+		public void HideItemOptionsPanel()
+		{
+			itemOptionsPanel.Close();
+		}
 		private void HandleQuests()
 		{
 			var progress = character.playerData.Progress.QuestProgress;

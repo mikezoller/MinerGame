@@ -92,6 +92,7 @@
     <Compile Include="Assets\Scripts\Models\Quests\QuestProgress.cs" />
     <Compile Include="Assets\Scripts\GameObjects\MessagePanel.cs" />
     <Compile Include="Assets\Scripts\Enemy.cs" />
+    <Compile Include="Assets\Scripts\GameObjects\ClosablePanel.cs" />
     <Compile Include="Assets\Scripts\CookingFire.cs" />
     <Compile Include="Assets\Scripts\Models\Quests\DialogPage.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
@@ -119,7 +120,9 @@
     <Compile Include="Assets\Scripts\EquippedItems.cs" />
     <Compile Include="Assets\Scripts\Helpers\CameraOrbit.cs" />
     <Compile Include="Assets\Scripts\Models\Item.cs" />
-    <Compile Include="Assets\Scripts\GameObjects\ClosablePanel.cs" />
+    <Compile Include="Assets\Scripts\ButtonListCreator.cs" />
+    <Compile Include="Assets\Scripts\ButtonItemDetails.cs" />
+    <Compile Include="Assets\PanelItemOptions.cs" />
   </ItemGroup>
   <ItemGroup>
      <None Include="Assets\Samples\Terrain Tools\0.1.0-preview\Terrain Assets\ThirdPartyNotices.txt" />

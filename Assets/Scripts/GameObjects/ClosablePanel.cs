@@ -16,7 +16,10 @@ namespace Assets.Scripts.GameObjects
 		public void Close()
 		{
 			gameObject.SetActive(false);
-			OnClosedDelegate();
+			if (OnClosedDelegate != null)
+			{
+				OnClosedDelegate();
+			}
 		}
 	}
 }
